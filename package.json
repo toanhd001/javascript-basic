@@ -1,0 +1,12 @@
+{
+  "name": "javascript-basic",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web học JavaScript từ con số 0 → coding test → cấu trúc dữ liệu & giải thuật cho phỏng vấn",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node scripts/check.js",
+    "start": "node scripts/serve.js"
+  },
+  "license": "MIT"
+}

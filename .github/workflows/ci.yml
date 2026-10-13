@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  content:
+    name: Nội dung web (lời giải mẫu, ví dụ, file sinh ra)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+
+  shop-api:
+    name: projects/shop-api (PostgreSQL thật)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/shop-api
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: shop
+          POSTGRES_PASSWORD: shop
+          POSTGRES_DB: shop_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U shop -d shop_test"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      TEST_DATABASE_URL: postgres://shop:shop@localhost:5432/shop_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Phần mẫu phải qua
+        run: npm run test:core
+      - name: Lời giải tham khảo phải qua 100% test
+        run: npm run check-solutions

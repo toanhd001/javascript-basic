@@ -505,6 +505,7 @@ pre {
 /* ---------- playground ---------- */
 .pg-head h1 { margin: 0; font-size: 26px; }
 .pg-head p { margin: 2px 0 0; }
+.lang-switch { display: flex; gap: 6px; margin: 8px 0 4px; }
 .pg-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; }
 .pg-editor { height: calc(100vh - var(--topbar-h) - 190px); min-height: 320px; }
 .pg-output { max-height: calc(100vh - var(--topbar-h) - 190px); min-height: 320px; }

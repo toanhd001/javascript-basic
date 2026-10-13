@@ -5,7 +5,8 @@
  *   2. id bài học / bài tập không trùng
  *   3. Code khởi đầu (starter) đúng cú pháp và KHÔNG tự qua hết test (nếu qua thì test vô nghĩa)
  *   4. Lời giải mẫu qua 100% test, và đủ nhanh
- *   5. Các ví dụ ```js run trong bài học chạy không lỗi
+ *   5. Các ví dụ ```js run / ```sql run trong bài học chạy không lỗi
+ * Bài SQL và bài API dùng database được chấm bằng đúng bản SQLite (js/vendor/sqljs.bundle.js) gửi cho trình duyệt.
  */
 'use strict';
 const fs = require('fs');
@@ -16,6 +17,36 @@ const { buildCurriculum, render, OUT } = require('./build');
 
 const ROOT = path.join(__dirname, '..');
 const JUDGE_SRC = fs.readFileSync(path.join(ROOT, 'js', 'judge-core.js'), 'utf8');
+const { createJudge } = require('../js/judge-core.js');
+const { createSqlJudge } = require('../js/sql-judge.js');
+
+// Nạp SQLite từ file vendor (glue + wasm base64), giống hệt trình duyệt
+const SQL_BUNDLE = (() => {
+  const sandbox = { window: {} };
+  vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'js', 'vendor', 'sqljs.bundle.js'), 'utf8'), sandbox);
+  const b = sandbox.window.SQLJS_BUNDLE;
+  return { glue: b.glue, wasm: new Uint8Array(Buffer.from(b.wasm, 'base64')) };
+})();
+
+function installSql(ctx) {
+  vm.runInContext(`var initSqlJs = (function () {\n${SQL_BUNDLE.glue}\nreturn initSqlJs;\n})();`, ctx);
+  ctx.__SQLJS_WASM = SQL_BUNDLE.wasm;
+  ctx.__sqlReady = vm.runInContext('initSqlJs({ wasmBinary: __SQLJS_WASM })', ctx);
+  return ctx.__sqlReady;
+}
+
+let sqlPromise = null;
+function getSQL() {
+  if (!sqlPromise) sqlPromise = installSql(vm.createContext({ console }));
+  return sqlPromise;
+}
+
+async function runSqlExercise(ex, sql) {
+  const SQL = await getSQL();
+  const results = [];
+  await createSqlJudge(createJudge()).runSqlTests(SQL, ex, sql, () => performance.now(), (r) => results.push(r));
+  return { results, topError: null };
+}
 const SLOW_MS = 1500;
 
 let failures = 0;
@@ -23,14 +54,15 @@ let warnings = 0;
 function fail(msg) { failures++; console.log('  ✗ ' + msg); }
 function warn(msg) { warnings++; console.log('  ⚠ ' + msg); }
 
-function makeContext(logs) {
+function makeContext(logs, withSql) {
   const sink = (...args) => { if (logs) logs.push(args.map(String).join(' ')); };
   const ctx = vm.createContext({
     console: { log: sink, info: sink, warn: sink, error: sink, debug: sink, table: sink, dir: sink },
     setTimeout, clearTimeout, setInterval, clearInterval, queueMicrotask, structuredClone,
-    performance
+    performance, URL, URLSearchParams, atob, btoa, TextEncoder, TextDecoder
   });
   vm.runInContext(JUDGE_SRC, ctx);
+  if (withSql) installSql(ctx);
   return ctx;
 }
 
@@ -44,7 +76,9 @@ function withTimeout(promise, ms) {
 }
 
 async function runExercise(ex, code, opts = {}) {
-  const ctx = makeContext(null);
+  if (ex.kind === 'sql') return runSqlExercise(ex, code);
+  const ctx = makeContext(null, ex.needsSql);
+  if (ex.needsSql) await ctx.__sqlReady;
   const results = [];
   let topError = null;
   try {
@@ -108,9 +142,10 @@ async function main() {
       for (const ex of l.exercises) {
         exCount++;
         const where = `[${l.id} › ${ex.id}]`;
-        if (!ex.fn && ex.tests.some((t) => !t.code)) fail(`${where} có test dùng args nhưng thiếu "fn"`);
+        if (ex.kind !== 'sql' && !ex.fn && ex.tests.some((t) => !t.code)) fail(`${where} có test dùng args nhưng thiếu "fn"`);
+        if (ex.kind === 'sql' && !ex.schema) fail(`${where} bài SQL thiếu "schema"`);
         if (!ex.tests.length) fail(`${where} không có test nào`);
-        try {
+        if (ex.kind !== 'sql') try {
           new vm.Script(ex.starter);
           if (ex.brokenStarter) fail(`${where} đánh dấu brokenStarter nhưng starter không có lỗi cú pháp`);
         } catch (e) {
@@ -141,15 +176,30 @@ async function main() {
   for (const m of modules) {
     for (const l of m.lessons) {
       const src = fs.readFileSync(path.join(ROOT, l.source), 'utf8');
-      const re = /```js run\n([\s\S]*?)```/g;
+      // ```sql run error → ví dụ CỐ Ý gây lỗi (minh hoạ ràng buộc...): phải ném lỗi
+      const re = /```(js|sql) run( error)?\n([\s\S]*?)```/g;
       let match;
       while ((match = re.exec(src))) {
         snippetCount++;
-        const code = match[1];
+        const code = match[3];
+        const expectError = !!match[2];
         try {
-          vm.runInContext(code, makeContext([]), { timeout: 3000 });
+          if (match[1] === 'sql') {
+            const db = new (await getSQL()).Database();
+            try {
+              if (l.snippetSchema) db.exec(l.snippetSchema);
+              db.exec(code);
+            } finally {
+              db.close();
+            }
+          } else {
+            const ctx = makeContext([], l.snippetNeedsSql);
+            if (l.snippetHelpers) vm.runInContext(l.snippetHelpers, ctx, { timeout: 3000 });
+            vm.runInContext(code, ctx, { timeout: 3000 });
+          }
+          if (expectError) fail(`[${l.id}] ví dụ #${snippetCount} đánh dấu "run error" nhưng không có lỗi`);
         } catch (e) {
-          fail(`[${l.id}] ví dụ #${snippetCount} lỗi: ${e.message}\n${code.split('\n').slice(0, 3).join('\n')}`);
+          if (!expectError) fail(`[${l.id}] ví dụ #${snippetCount} lỗi: ${e.message}\n${code.split('\n').slice(0, 3).join('\n')}`);
         }
       }
     }

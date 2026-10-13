@@ -17,11 +17,23 @@
     ''
   ].join('\n');
 
+  var PLAYGROUND_SQL_DEFAULT = [
+    '-- Playground SQL: mỗi lần chạy là một database SQLite mới. Ctrl+Enter để chạy.',
+    'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, city TEXT);',
+    "INSERT INTO users (name, city) VALUES ('An', 'Seoul'), ('Bình', 'Busan'), ('Chi', 'Seoul');",
+    '',
+    'SELECT city, COUNT(*) AS so_nguoi',
+    'FROM users',
+    'GROUP BY city',
+    'ORDER BY so_nguoi DESC;',
+    ''
+  ].join('\n');
+
   // ---------- lưu trữ ----------
   var store = loadStore();
 
   function loadStore() {
-    var empty = { code: {}, passed: {}, read: {}, hints: {}, last: '', playground: null, theme: null };
+    var empty = { code: {}, passed: {}, read: {}, hints: {}, last: '', playground: null, playgroundSql: null, playgroundLang: 'js', theme: null };
     try {
       var raw = localStorage.getItem(STORE_KEY);
       if (!raw) return empty;
@@ -92,9 +104,10 @@
   }
 
   function highlightBlocks(ctx) {
-    $all('pre code.language-js', ctx).forEach(function (code) {
+    $all('pre code.language-js, pre code.language-sql', ctx).forEach(function (code) {
       if (code.dataset.hl) return;
-      code.innerHTML = window.Editor.highlight(code.textContent);
+      var lang = code.classList.contains('language-sql') ? 'sql' : 'js';
+      code.innerHTML = window.Editor.highlight(code.textContent, lang);
       code.dataset.hl = '1';
     });
   }
@@ -151,7 +164,16 @@
       [/Unexpected token/, 'Cú pháp sai gần vị trí này: thiếu/thừa dấu ngoặc, dấu phẩy, hoặc viết sai từ khoá.'],
       [/Invalid array length/, 'Độ dài mảng không hợp lệ (âm hoặc quá lớn).'],
       [/Maximum call stack|too much recursion/, 'Đệ quy quá sâu.'],
-      [/Invalid or unexpected token/, 'Có ký tự lạ hoặc chuỗi chưa được đóng nháy.']
+      [/Invalid or unexpected token/, 'Có ký tự lạ hoặc chuỗi chưa được đóng nháy.'],
+      [/no such table/, 'Bảng không tồn tại: kiểm tra tên bảng (xem phần "Cấu trúc & dữ liệu mẫu").'],
+      [/no such column/, 'Cột không tồn tại: sai tên cột, hoặc chuỗi đang dùng nháy kép "..." thay vì nháy đơn \'...\'.'],
+      [/ambiguous column name/, 'Hai bảng cùng có cột này: ghi rõ bảng.cột (VD users.id).'],
+      [/UNIQUE constraint failed/, 'Vi phạm ràng buộc UNIQUE: giá trị đã tồn tại.'],
+      [/NOT NULL constraint failed/, 'Vi phạm NOT NULL: cột bắt buộc đang bị bỏ trống.'],
+      [/FOREIGN KEY constraint failed/, 'Vi phạm khoá ngoại: tham chiếu tới dòng không tồn tại (hoặc đang xoá dòng còn được tham chiếu).'],
+      [/misuse of aggregate|must appear in the GROUP BY|aggregate functions are not allowed/, 'Hàm gộp (COUNT, SUM...) dùng sai chỗ: điều kiện trên kết quả gộp phải viết trong HAVING, không phải WHERE.'],
+      [/syntax error/, 'Cú pháp SQL sai gần chỗ được báo: thiếu dấu phẩy, sai thứ tự mệnh đề (SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY → LIMIT)?'],
+      [/incomplete input/, 'Câu SQL chưa kết thúc: thiếu dấu ) hoặc nháy đóng.']
     ];
     for (var i = 0; i < tips.length; i++) if (tips[i][0].test(message)) return tips[i][1];
     return '';
@@ -173,6 +195,8 @@
       code: code,
       mode: 'run',
       exercise: opts.exercise,
+      language: opts.language,
+      schema: opts.schema,
       onEvent: function (ev) {
         if (ev.type === 'log') out.log(ev.level, ev.text);
         else if (ev.type === 'error') reportError(out, ev);
@@ -366,7 +390,7 @@
     article.appendChild(foot);
     layout.appendChild(article);
 
-    enhanceSnippets(article);
+    enhanceSnippets(article, lesson);
 
     if (hasEx) {
       var ws = h('section', { class: 'workspace', 'aria-label': 'Bài tập' });
@@ -385,21 +409,35 @@
   }
 
   // Ví dụ trong bài có nút ▶ chạy ngay và nút mở trong Playground
-  function enhanceSnippets(ctx) {
+  function enhanceSnippets(ctx, lesson) {
     highlightBlocks(ctx);
+    // Ví dụ JS của bài có thể cần "code có sẵn" (VD mini-Express) — chạy như một bài tập không có test
+    var snippetEx = lesson && lesson.snippetHelpers
+      ? { helpers: lesson.snippetHelpers, needsSql: lesson.snippetNeedsSql, tests: [] }
+      : null;
     $all('pre[data-run]', ctx).forEach(function (pre) {
       var code = pre.textContent;
+      var lang = pre.querySelector('code.language-sql') ? 'sql' : 'js';
+      var withHelpers = lang === 'js' && snippetEx;
       var outHost = h('div', { class: 'snippet-out', hidden: true });
       var out = createConsole(outHost, null);
       var bar = h('div', { class: 'snippet-bar' }, [
         h('button', {
           class: 'btn tiny primary', type: 'button', text: '▶ Chạy',
-          onclick: function () { outHost.hidden = false; runInConsole(code, out); }
+          onclick: function () {
+            outHost.hidden = false;
+            runInConsole(code, out, {
+              language: lang,
+              schema: lang === 'sql' && lesson ? lesson.snippetSchema : '',
+              exercise: withHelpers ? snippetEx : null
+            });
+          }
         }),
-        h('button', {
+        withHelpers || (lang === 'sql' && lesson && lesson.snippetSchema) ? null : h('button', {
           class: 'btn tiny', type: 'button', text: '✎ Sửa trong Playground',
           onclick: function () {
-            store.playground = code;
+            if (lang === 'sql') store.playgroundSql = code; else store.playground = code;
+            store.playgroundLang = lang;
             save(true);
             location.hash = '#/playground';
           }
@@ -411,6 +449,7 @@
   }
 
   function exampleNodes(ex) {
+    if (ex.kind === 'sql') return null;
     var examples = ex.tests.filter(function (t) { return !t.hidden && !t.gen; }).slice(0, 3);
     if (!examples.length) return null;
     var judge = window.createJudge();
@@ -448,6 +487,10 @@
       ]),
       h('div', { class: 'prose', html: ex.prompt }),
       exampleNodes(ex),
+      ex.kind === 'sql' && ex.schema ? h('details', { class: 'helpers' }, [
+        h('summary', { text: 'Cấu trúc bảng & dữ liệu mẫu (bấm để xem — hoặc chạy SELECT * FROM tên_bảng)' }),
+        h('pre', null, [h('code', { class: 'language-sql', text: ex.schema })])
+      ]) : null,
       ex.helpers ? h('details', { class: 'helpers' }, [
         h('summary', { text: 'Code có sẵn (không cần viết lại)' }),
         h('pre', null, [h('code', { class: 'language-js', text: ex.helpers })])
@@ -461,6 +504,7 @@
     var saved = store.code[ex.id];
     var editor = window.Editor.create(edHost, {
       value: saved !== undefined ? saved : ex.starter,
+      language: ex.kind === 'sql' ? 'sql' : 'js',
       label: 'Code cho bài ' + ex.title,
       onChange: function (v) { store.code[ex.id] = v; save(); },
       onRun: function () { doRun(); },
@@ -506,7 +550,7 @@
 
     var toolbar = h('div', { class: 'toolbar' }, [
       testBtn, runBtn, stopBtn,
-      h('button', { class: 'btn', type: 'button', text: '🔍 Kiểm tra cú pháp', onclick: function () { checkSyntax(editor.getValue(), out, editor); } }),
+      ex.kind === 'sql' ? null : h('button', { class: 'btn', type: 'button', text: '🔍 Kiểm tra cú pháp', onclick: function () { checkSyntax(editor.getValue(), out, editor); } }),
       hintBtn,
       h('button', {
         class: 'btn', type: 'button', text: '📖 Lời giải',
@@ -544,7 +588,7 @@
           }
         })
       ]));
-      solutionBox.appendChild(h('pre', null, [h('code', { class: 'language-js', text: ex.solution })]));
+      solutionBox.appendChild(h('pre', null, [h('code', { class: ex.kind === 'sql' ? 'language-sql' : 'language-js', text: ex.solution })]));
       if (ex.explain) solutionBox.appendChild(h('div', { class: 'prose', html: ex.explain }));
       highlightBlocks(solutionBox);
       solutionBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -673,18 +717,35 @@
   function showPlayground() {
     var main = $('#main');
     main.innerHTML = '';
+    var lang = store.playgroundLang === 'sql' ? 'sql' : 'js';
+    var isSql = lang === 'sql';
+    var defaults = isSql ? PLAYGROUND_SQL_DEFAULT : PLAYGROUND_DEFAULT;
+    var key = isSql ? 'playgroundSql' : 'playground';
+    function switchTo(l) {
+      if (l === lang) return;
+      store.playgroundLang = l;
+      save(true);
+      showPlayground();
+    }
     var wrap = h('section', { class: 'playground' }, [
       h('div', { class: 'pg-head' }, [
         h('h1', { text: '🧪 Playground' }),
-        h('p', { class: 'muted', text: 'Thử bất cứ thứ gì. Code được tự lưu trong trình duyệt.' })
+        h('div', { class: 'lang-switch', role: 'group', 'aria-label': 'Ngôn ngữ' }, [
+          h('button', { type: 'button', class: 'ex-tab' + (!isSql ? ' active' : ''), 'aria-pressed': String(!isSql), text: 'JavaScript', onclick: function () { switchTo('js'); } }),
+          h('button', { type: 'button', class: 'ex-tab' + (isSql ? ' active' : ''), 'aria-pressed': String(isSql), text: 'SQL (SQLite)', onclick: function () { switchTo('sql'); } })
+        ]),
+        h('p', { class: 'muted', text: isSql
+          ? 'Mỗi lần chạy là một database SQLite mới, trống: tự CREATE TABLE / INSERT rồi truy vấn. Code được tự lưu.'
+          : 'Thử bất cứ thứ gì. Code được tự lưu trong trình duyệt.' })
       ])
     ]);
     var edHost = h('div', { class: 'pg-editor' });
     var outHost = h('div', { class: 'pg-output' });
     var editor = window.Editor.create(edHost, {
-      value: store.playground || PLAYGROUND_DEFAULT,
+      value: store[key] || defaults,
+      language: lang,
       label: 'Playground',
-      onChange: function (v) { store.playground = v; save(); },
+      onChange: function (v) { store[key] = v; save(); },
       onRun: function () { run(); }
     });
     var out = createConsole(outHost, editor);
@@ -692,17 +753,18 @@
     var stopBtn = h('button', { class: 'btn danger', type: 'button', hidden: true, text: '■ Dừng', onclick: function () { stopCurrent(); } });
     function run() {
       runInConsole(editor.getValue(), out, {
+        language: lang,
         onStart: function () { runBtn.disabled = true; stopBtn.hidden = false; },
         onEnd: function () { runBtn.disabled = false; stopBtn.hidden = true; }
       });
     }
     wrap.appendChild(h('div', { class: 'toolbar' }, [
       runBtn, stopBtn,
-      h('button', { class: 'btn', type: 'button', text: '🔍 Kiểm tra cú pháp', onclick: function () { checkSyntax(editor.getValue(), out, editor); } }),
+      isSql ? null : h('button', { class: 'btn', type: 'button', text: '🔍 Kiểm tra cú pháp', onclick: function () { checkSyntax(editor.getValue(), out, editor); } }),
       h('button', { class: 'btn ghost', type: 'button', text: 'Xoá output', onclick: function () { out.clear(); } }),
       h('button', {
         class: 'btn ghost', type: 'button', text: '↺ Code mẫu',
-        onclick: function () { if (confirm('Thay code hiện tại bằng code mẫu?')) editor.setValue(PLAYGROUND_DEFAULT); }
+        onclick: function () { if (confirm('Thay code hiện tại bằng code mẫu?')) editor.setValue(defaults); }
       })
     ]));
     wrap.appendChild(h('div', { class: 'pg-grid' }, [edHost, outHost]));

@@ -153,6 +153,9 @@ function loadExercises(file) {
       compare: ex.compare || null,
       timeout: ex.timeout || null,
       brokenStarter: !!ex.brokenStarter,
+      kind: ex.kind || 'js',          // 'js' | 'sql'
+      schema: ex.schema ? ex.schema.replace(/^\n/, '').replace(/\n$/, '') : '',
+      needsSql: !!ex.needsSql,        // bài JS có dùng SQLite (biến db) trong helpers
       tests: ex.tests
     };
   });
@@ -171,11 +174,29 @@ function buildCurriculum() {
       const file = path.join(full, f);
       const { meta, body } = parseFrontmatter(fs.readFileSync(file, 'utf8'), file);
       const exFile = file.replace(/\.md$/, '.exercises.js');
+      // frontmatter `snippetHelpers: ./file.js` → code có sẵn cho các ví dụ ```js run của bài
+      let snippetHelpers = '';
+      if (meta.snippetHelpers) {
+        const helperFile = path.join(full, meta.snippetHelpers);
+        delete require.cache[require.resolve(helperFile)];
+        const mod = require(helperFile);
+        snippetHelpers = (typeof mod === 'function' ? mod() : mod).replace(/^\n/, '');
+      }
+      // frontmatter `snippetSchema: ./seed.js` → dữ liệu SQL nạp trước mỗi ví dụ ```sql run
+      let snippetSchema = '';
+      if (meta.snippetSchema) {
+        const schemaFile = path.join(full, meta.snippetSchema);
+        delete require.cache[require.resolve(schemaFile)];
+        snippetSchema = require(schemaFile);
+      }
       lessons.push({
         id: meta.id,
         title: meta.title,
         html: mdToHtml(body),
         source: path.relative(ROOT, file),
+        snippetSchema,
+        snippetHelpers,
+        snippetNeedsSql: /__sqlReady/.test(snippetHelpers),
         exercises: fs.existsSync(exFile) ? loadExercises(exFile) : []
       });
     }

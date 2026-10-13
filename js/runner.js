@@ -18,6 +18,7 @@
     var AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
     var logCount = 0, LOG_LIMIT = 1000;
     var active = {}; // các timer còn chờ
+    var holds = 0;   // các Promise "giữ worker sống" (VD đang khởi tạo SQLite)
     var mode = null, finished = false;
 
     function errorLine(e) {
@@ -56,10 +57,10 @@
     }
 
     function checkIdle() {
-      if (mode !== 'run' || finished || pendingCount() > 0) return;
+      if (mode !== 'run' || finished || pendingCount() > 0 || holds > 0) return;
       // chờ thêm một nhịp để các microtask (Promise.then) chạy xong
       realSetTimeout(function () {
-        if (!finished && pendingCount() === 0) {
+        if (!finished && pendingCount() === 0 && holds === 0) {
           finished = true;
           post({ type: 'done' });
         }
@@ -95,6 +96,55 @@
       checkIdle();
     };
 
+    // Helpers bất đồng bộ (VD request() phải chờ SQLite khởi tạo) gọi __hold để chế độ ▶ Chạy
+    // không kết thúc sớm khi chưa có setTimeout nào đang chờ.
+    self.__hold = function (promise) {
+      holds++;
+      return Promise.resolve(promise).finally(function () {
+        holds--;
+        checkIdle();
+      });
+    };
+
+    function finishWith(summary) {
+      finished = true;
+      post({ type: 'done', summary: summary });
+    }
+
+    async function runSql(data) {
+      var sqlJudge = createSqlJudge(judge);
+      var SQL = await self.__sqlReady;
+      if (data.mode === 'sql-test') {
+        var summary = await sqlJudge.runSqlTests(SQL, data.exercise, data.code,
+          function () { return performance.now(); },
+          function (r) { post({ type: 'test', result: r }); });
+        finishWith(summary);
+        return;
+      }
+      var db = null;
+      try {
+        db = sqlJudge.freshDb(SQL, data.schema || '', '');
+      } catch (e) {
+        post({ type: 'error', message: 'Lỗi khi nạp dữ liệu mẫu: ' + sqlJudge.errText(e) });
+        finishWith(null);
+        return;
+      }
+      try {
+        var sets = db.exec(data.code);
+        sets.forEach(function (set) {
+          post({ type: 'log', level: 'log', text: sqlJudge.formatTable(set.columns, set.values, 100) });
+        });
+        if (!sets.length) {
+          post({ type: 'log', level: 'info', text: 'Câu lệnh chạy xong, không trả về bảng nào (' + db.getRowsModified() + ' dòng bị thay đổi ở câu lệnh cuối).' });
+        }
+      } catch (e) {
+        post({ type: 'error', message: 'Lỗi SQL: ' + sqlJudge.errText(e) });
+      } finally {
+        db.close();
+      }
+      finishWith(null);
+    }
+
     self.addEventListener('error', function (e) {
       e.preventDefault();
       var line = e.lineno ? e.lineno - offset : null;
@@ -116,6 +166,13 @@
     self.onmessage = function (msg) {
       var data = msg.data;
       mode = data.mode;
+      if (mode === 'sql-run' || mode === 'sql-test') {
+        runSql(data).catch(function (e) {
+          post({ type: 'error', message: judge.errorText(e) });
+          finishWith(null);
+        });
+        return;
+      }
       if (mode === 'run') {
         checkIdle();
         return;
@@ -131,17 +188,40 @@
           now: function () { return performance.now(); },
           errorLine: errorLine
         };
-        judge.runTests(env, data.exercise, function (r) {
-          post({ type: 'test', result: r });
-        }).then(function (summary) {
-          finished = true;
-          post({ type: 'done', summary: summary });
+        Promise.resolve(self.__sqlReady).then(function () {
+          return judge.runTests(env, data.exercise, function (r) {
+            post({ type: 'test', result: r });
+          });
+        }).then(finishWith, function (e) {
+          post({ type: 'error', message: judge.errorText(e) });
+          finishWith(null);
         });
       }
     };
   }
 
-  function buildSource(code, helpers, mode) {
+  // Mã khởi tạo SQLite đặt ở đầu worker: glue của sql.js (bọc trong hàm để không lộ biến nội bộ)
+  // + wasm giải mã từ base64. __sqlReady là Promise trả về đối tượng SQL của sql.js.
+  function sqlHead() {
+    var bundle = root.SQLJS_BUNDLE;
+    if (!bundle) throw new Error('Chưa nạp SQLite (js/vendor/sqljs.bundle.js)');
+    return 'var initSqlJs = (function () {\n' + bundle.glue + '\nreturn initSqlJs;\n})();\n' +
+      'var __SQLJS_WASM = (function (s) { var b = atob(s), a = new Uint8Array(b.length); ' +
+      'for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; })(' + JSON.stringify(bundle.wasm) + ');\n' +
+      'self.__sqlReady = initSqlJs({ wasmBinary: __SQLJS_WASM });\n' +
+      'var createSqlJudge = ' + root.createSqlJudge.toString() + ';';
+  }
+
+  function isSqlKind(ex, opts) {
+    return (ex && ex.kind === 'sql') || opts.language === 'sql';
+  }
+
+  function needsSql(opts) {
+    var ex = opts.exercise;
+    return isSqlKind(ex, opts) || !!(ex && ex.needsSql && opts.mode !== 'check');
+  }
+
+  function buildSource(code, helpers, mode, withSql) {
     if (mode === 'check') {
       // Bọc trong một hàm KHÔNG được gọi: trình duyệt phải parse (bắt lỗi cú pháp) nhưng không chạy.
       return {
@@ -151,8 +231,13 @@
     }
     // offset = số dòng đứng trước code người học; phải biết ngay từ đầu để báo đúng dòng
     // cả với lỗi xảy ra ở top-level (trước khi worker nhận được message nào).
-    var head = 'var __judge = (' + root.createJudge.toString() + ')();\n' +
+    var head = (withSql ? sqlHead() + '\n' : '') +
+      'var __judge = (' + root.createJudge.toString() + ')();\n' +
       '(' + workerBoot.toString() + ')(self, __judge, __OFFSET__);';
+    if (mode === 'sql-run' || mode === 'sql-test') {
+      // Bài SQL: code người học là SQL, được gửi qua message chứ không ghép vào script
+      return { source: head.replace('__OFFSET__', '0') + '\n', offset: 0 };
+    }
     if (helpers) head += '\n' + helpers;
     var offset = head.split('\n').length;
     head = head.replace('__OFFSET__', String(offset));
@@ -160,19 +245,64 @@
   }
 
   /*
-   * run({ code, mode: 'run' | 'test' | 'check', exercise, timeout, onEvent })
+   * run({ code, mode: 'run' | 'test' | 'check', exercise, language?, schema?, timeout, onEvent })
+ *   exercise.kind === 'sql' hoặc language === 'sql': code là SQL, chạy trên SQLite (sql.js)
+ *   exercise.needsSql: bài JavaScript có dùng biến `db` (SQLite) trong helpers
    * onEvent nhận: {type:'log'|'error'|'test'|'done'|'timeout'|'stopped', ...}
    * Trả về { stop() }.
    */
+  var sqlLoading = null;
+
+  // Nạp file SQLite (~1MB) chỉ khi cần, bằng <script> để chạy được cả qua file://
+  function ensureSql() {
+    if (root.SQLJS_BUNDLE) return Promise.resolve();
+    if (!sqlLoading) {
+      sqlLoading = new Promise(function (resolve, reject) {
+        var s = document.createElement('script');
+        s.src = 'js/vendor/sqljs.bundle.js';
+        s.onload = function () { resolve(); };
+        s.onerror = function () {
+          sqlLoading = null;
+          reject(new Error('Không tải được js/vendor/sqljs.bundle.js'));
+        };
+        document.head.appendChild(s);
+      });
+    }
+    return sqlLoading;
+  }
+
   function run(opts) {
-    var mode = opts.mode || 'run';
+    if (!needsSql(opts) || root.SQLJS_BUNDLE) return start(opts);
+    // Phải tải SQLite trước: trả về handle ngay, khởi động worker khi tải xong
+    var inner = null, cancelled = false;
+    ensureSql().then(function () {
+      if (!cancelled) inner = start(opts);
+    }, function (e) {
+      if (cancelled) return;
+      opts.onEvent({ type: 'error', message: e.message });
+      opts.onEvent({ type: 'done', failed: true, elapsed: 0 });
+    });
+    return {
+      stop: function () {
+        if (inner) inner.stop();
+        else if (!cancelled) {
+          cancelled = true;
+          opts.onEvent({ type: 'stopped' });
+        }
+      }
+    };
+  }
+
+  function start(opts) {
     var ex = opts.exercise || null;
-    var built = buildSource(opts.code, ex && mode !== 'check' ? ex.helpers : '', mode);
+    var mode = opts.mode || 'run';
+    if (isSqlKind(ex, opts) && mode !== 'check') mode = mode === 'test' ? 'sql-test' : 'sql-run';
+    var built = buildSource(opts.code, ex && mode !== 'check' ? ex.helpers : '', mode, needsSql(opts));
     var url = URL.createObjectURL(new Blob([built.source], { type: 'text/javascript' }));
     var worker = new Worker(url);
     var ended = false;
     var startedAt = performance.now();
-    var timeout = opts.timeout || (mode === 'test' ? 6000 : 5000);
+    var timeout = opts.timeout || (mode === 'test' || mode === 'sql-test' ? 6000 : 5000);
 
     function finish(ev) {
       if (ended) return;
@@ -206,7 +336,9 @@
     if (mode !== 'check') {
       worker.postMessage({
         mode: mode,
-        exercise: ex ? { fn: ex.fn, tests: ex.tests, compare: ex.compare } : null
+        code: opts.code,
+        schema: ex ? ex.schema : opts.schema,
+        exercise: ex ? { fn: ex.fn, tests: ex.tests, compare: ex.compare, schema: ex.schema } : null
       });
     }
 
@@ -215,5 +347,5 @@
     };
   }
 
-  root.Runner = { run: run, buildSource: buildSource };
+  root.Runner = { run: run, buildSource: buildSource, ensureSql: ensureSql };
 })(window);

@@ -12,18 +12,25 @@
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  function highlight(code) {
+  // SQL: comment, chuỗi, số, từ khoá (không phân biệt hoa thường), hàm
+  var SQL_TOKEN = /(--[^\n]*|\/\*[\s\S]*?(?:\*\/|$))|('(?:''|[^'])*'?)|(\b\d+(?:\.\d+)?\b)|\b(select|from|where|and|or|not|in|is|null|like|between|order|by|group|having|limit|offset|as|distinct|join|inner|left|right|outer|full|cross|on|using|union|all|insert|into|values|update|set|delete|create|table|index|unique|primary|key|foreign|references|default|check|drop|alter|add|column|begin|commit|rollback|transaction|asc|desc|case|when|then|else|end|exists|integer|text|real|blob|autoincrement|if|with|explain|query|plan|cascade|returning|conflict|do|nothing|view)\b|\b(true|false)\b|()()([A-Za-z_][\w]*)(?=\s*\()/gi;
+
+  function tokenize(re, code) {
     var out = '', last = 0, m;
-    TOKEN.lastIndex = 0;
-    while ((m = TOKEN.exec(code))) {
-      if (m[0] === '') { TOKEN.lastIndex++; continue; }
+    re.lastIndex = 0;
+    while ((m = re.exec(code))) {
+      if (m[0] === '') { re.lastIndex++; continue; }
       if (m.index > last) out += esc(code.slice(last, m.index));
       var cls = 'f';
-      for (var g = 1; g < CLASSES.length; g++) if (m[g] !== undefined) { cls = CLASSES[g]; break; }
+      for (var g = 1; g < CLASSES.length; g++) if (m[g] !== undefined && m[g] !== '') { cls = CLASSES[g]; break; }
       out += '<span class="tok-' + cls + '">' + esc(m[0]) + '</span>';
-      last = TOKEN.lastIndex;
+      last = re.lastIndex;
     }
     return out + esc(code.slice(last));
+  }
+
+  function highlight(code, language) {
+    return tokenize(language === 'sql' ? SQL_TOKEN : TOKEN, code);
   }
 
   var PAIRS = { '{': '}', '[': ']', '(': ')' };
@@ -46,7 +53,7 @@
     var tabEscapes = false; // nhấn Esc rồi Tab để rời editor bằng bàn phím
 
     function render() {
-      codeEl.innerHTML = highlight(ta.value) + '\n';
+      codeEl.innerHTML = highlight(ta.value, opts.language) + '\n';
       var n = ta.value.split('\n').length;
       if (n !== lineCount) {
         var html = '';

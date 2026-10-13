@@ -112,7 +112,7 @@ class MinStack {
     prompt: `
 \`temps[i]\` là nhiệt độ ngày i. Trả về mảng \`answer\` với \`answer[i]\` = số ngày phải chờ sau ngày i để có ngày **ấm hơn**; không có thì 0.
 
-\`[73,74,75,71,69,72,76,73]\` → \`[1,1,4,2,1,1,0,0]\`. Ràng buộc \`n <= 10^5\`.
+\`[73,74,75,71,69,72,76,73]\` → \`[1,1,4,2,1,1,0,0]\`. Ràng buộc \`n <= 2·10^5\`.
 `,
     starter: `
 function dailyTemperatures(temps) {
@@ -142,7 +142,7 @@ function dailyTemperatures(temps) {
       { args: [[30, 40, 50, 60]], expected: [1, 1, 1, 0] },
       { args: [[30, 60, 90]], expected: [1, 1, 0] },
       { args: [[50]], expected: [0] },
-      { gen: 'const a = Array.from({ length: 100000 }, (_, i) => 100000 - i); a.push(200000); return [a];', check: 'return result.length === 100001 && result[0] === 100000 && result[99999] === 1 && result[100000] === 0;', label: 'n = 100.000 giảm dần, ngày cuối nóng nhất', expectedText: '[100000, 99999, ..., 1, 0]' }
+      { gen: 'const a = Array.from({ length: 200000 }, (_, i) => 200000 - i); a.push(300000); return [a];', check: 'return result.length === 200001 && result[0] === 200000 && result[199999] === 1 && result[200000] === 0;', label: 'n = 200.000 giảm dần, ngày cuối nóng nhất', expectedText: '[200000, 199999, ..., 1, 0]' }
     ]
   },
   {

@@ -5,7 +5,7 @@ module.exports = [
     difficulty: 'easy',
     fn: 'uniqueInOrder',
     prompt: `
-Viết \`uniqueInOrder(arr)\` trả về mảng các giá trị không trùng lặp, **giữ thứ tự xuất hiện lần đầu**. Bộ test có mảng 200.000 phần tử — \`includes\` trong vòng lặp sẽ quá chậm.
+Viết \`uniqueInOrder(arr)\` trả về mảng các giá trị không trùng lặp, **giữ thứ tự xuất hiện lần đầu**. Bộ test có mảng 800.000 phần tử — \`includes\` trong vòng lặp sẽ quá chậm.
 `,
     starter: `
 function uniqueInOrder(arr) {
@@ -31,10 +31,10 @@ function uniqueInOrder(arr) {
       { args: [['a', 'b', 'a']], expected: ['a', 'b'] },
       { args: [[]], expected: [] },
       {
-        gen: 'return [Array.from({ length: 200000 }, (_, i) => i % 150000)];',
-        check: 'return Array.isArray(result) && result.length === 150000 && result[0] === 0 && result[149999] === 149999;',
-        label: 'n = 200.000 phần tử (150.000 giá trị khác nhau) — cần O(n)',
-        expectedText: 'mảng 150.000 phần tử [0, 1, ..., 149999]'
+        gen: 'return [Array.from({ length: 800000 }, (_, i) => i % 600000)];',
+        check: 'return Array.isArray(result) && result.length === 600000 && result[0] === 0 && result[599999] === 599999;',
+        label: 'n = 800.000 phần tử (600.000 giá trị khác nhau) — cần O(n)',
+        expectedText: 'mảng 600.000 phần tử [0, 1, ..., 599999]'
       }
     ]
   },

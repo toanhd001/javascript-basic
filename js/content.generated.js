@@ -197,7 +197,7 @@ window.CURRICULUM = [
        },
        {
         "args": [
-         null
+         undefined
         ],
         "expected": "undefined"
        },
@@ -871,7 +871,7 @@ window.CURRICULUM = [
        },
        {
         "args": [],
-        "expected": null
+        "expected": -Infinity
        }
       ]
      },
@@ -2435,7 +2435,7 @@ window.CURRICULUM = [
       "id": "unique-in-order",
       "title": "Khử trùng lặp giữ thứ tự",
       "difficulty": "easy",
-      "prompt": "<p>Viết <code>uniqueInOrder(arr)</code> trả về mảng các giá trị không trùng lặp, <strong>giữ thứ tự xuất hiện lần đầu</strong>. Bộ test có mảng 200.000 phần tử — <code>includes</code> trong vòng lặp sẽ quá chậm.</p>\n",
+      "prompt": "<p>Viết <code>uniqueInOrder(arr)</code> trả về mảng các giá trị không trùng lặp, <strong>giữ thứ tự xuất hiện lần đầu</strong>. Bộ test có mảng 800.000 phần tử — <code>includes</code> trong vòng lặp sẽ quá chậm.</p>\n",
       "fn": "uniqueInOrder",
       "starter": "function uniqueInOrder(arr) {\n  const result = [];\n  for (const x of arr) {\n    if (!result.includes(x)) result.push(x);\n  }\n  return result;\n}\n",
       "solution": "function uniqueInOrder(arr) {\n  return [...new Set(arr)];\n}\n",
@@ -2486,10 +2486,10 @@ window.CURRICULUM = [
         "expected": []
        },
        {
-        "gen": "return [Array.from({ length: 200000 }, (_, i) => i % 150000)];",
-        "check": "return Array.isArray(result) && result.length === 150000 && result[0] === 0 && result[149999] === 149999;",
-        "label": "n = 200.000 phần tử (150.000 giá trị khác nhau) — cần O(n)",
-        "expectedText": "mảng 150.000 phần tử [0, 1, ..., 149999]"
+        "gen": "return [Array.from({ length: 800000 }, (_, i) => i % 600000)];",
+        "check": "return Array.isArray(result) && result.length === 600000 && result[0] === 0 && result[599999] === 599999;",
+        "label": "n = 800.000 phần tử (600.000 giá trị khác nhau) — cần O(n)",
+        "expectedText": "mảng 600.000 phần tử [0, 1, ..., 599999]"
        }
       ]
      },
@@ -3932,9 +3932,9 @@ window.CURRICULUM = [
         "expected": 1
        },
        {
-        "gen": "let s = \"\"; for (let i = 0; i < 100000; i++) s += String.fromCharCode(33 + (i % 90)); return [s];",
-        "label": "n = 100.000",
-        "expected": 90
+        "gen": "const chars = []; for (let i = 0; i < 50000; i++) chars.push(String.fromCharCode(0x100 + i)); return [chars.join(\"\") + chars.join(\"\")];",
+        "label": "n = 100.000, 50.000 ký tự khác nhau — vét cạn O(n²) sẽ quá thời gian",
+        "expected": 50000
        }
       ]
      },
@@ -4362,7 +4362,7 @@ window.CURRICULUM = [
       "id": "daily-temperatures",
       "title": "Daily Temperatures",
       "difficulty": "medium",
-      "prompt": "<p><code>temps[i]</code> là nhiệt độ ngày i. Trả về mảng <code>answer</code> với <code>answer[i]</code> = số ngày phải chờ sau ngày i để có ngày <strong>ấm hơn</strong>; không có thì 0.</p>\n<p><code>[73,74,75,71,69,72,76,73]</code> → <code>[1,1,4,2,1,1,0,0]</code>. Ràng buộc <code>n &lt;= 10^5</code>.</p>\n",
+      "prompt": "<p><code>temps[i]</code> là nhiệt độ ngày i. Trả về mảng <code>answer</code> với <code>answer[i]</code> = số ngày phải chờ sau ngày i để có ngày <strong>ấm hơn</strong>; không có thì 0.</p>\n<p><code>[73,74,75,71,69,72,76,73]</code> → <code>[1,1,4,2,1,1,0,0]</code>. Ràng buộc <code>n &lt;= 2·10^5</code>.</p>\n",
       "fn": "dailyTemperatures",
       "starter": "function dailyTemperatures(temps) {\n\n}\n",
       "solution": "function dailyTemperatures(temps) {\n  const answer = new Array(temps.length).fill(0);\n  const stack = [];\n  for (let i = 0; i < temps.length; i++) {\n    while (stack.length && temps[stack[stack.length - 1]] < temps[i]) {\n      const j = stack.pop();\n      answer[j] = i - j;\n    }\n    stack.push(i);\n  }\n  return answer;\n}\n",
@@ -4442,10 +4442,10 @@ window.CURRICULUM = [
         ]
        },
        {
-        "gen": "const a = Array.from({ length: 100000 }, (_, i) => 100000 - i); a.push(200000); return [a];",
-        "check": "return result.length === 100001 && result[0] === 100000 && result[99999] === 1 && result[100000] === 0;",
-        "label": "n = 100.000 giảm dần, ngày cuối nóng nhất",
-        "expectedText": "[100000, 99999, ..., 1, 0]"
+        "gen": "const a = Array.from({ length: 200000 }, (_, i) => 200000 - i); a.push(300000); return [a];",
+        "check": "return result.length === 200001 && result[0] === 200000 && result[199999] === 1 && result[200000] === 0;",
+        "label": "n = 200.000 giảm dần, ngày cuối nóng nhất",
+        "expectedText": "[200000, 199999, ..., 1, 0]"
        }
       ]
      },
@@ -4730,6 +4730,3260 @@ window.CURRICULUM = [
         "expected": [
          1
         ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dsa-recursion",
+    "title": "Đệ quy",
+    "html": "<p>Hàm <strong>đệ quy</strong> gọi lại chính nó với bài toán <strong>nhỏ hơn</strong>. Đây là nền tảng của cây, đồ thị (DFS), backtracking, chia để trị và quy hoạch động.</p>\n<h2>Hai thành phần bắt buộc</h2>\n<ol><li><strong>Base case</strong> (điều kiện dừng): bài toán đủ nhỏ để trả lời ngay.</li><li><strong>Bước đệ quy</strong>: đưa bài toán về phiên bản nhỏ hơn, <strong>tin rằng</strong> lời gọi đệ quy trả về đúng, rồi kết hợp.</li></ol>\n<pre class=\"code\" data-run><code class=\"language-js\">function factorial(n) {\n  if (n &lt;= 1) return 1;          // base case\n  return n * factorial(n - 1);   // bước đệ quy: n! = n × (n−1)!\n}\nconsole.log(factorial(5)); // 120\n\nfunction sumDigits(n) {\n  if (n &lt; 10) return n;\n  return (n % 10) + sumDigits(Math.floor(n / 10));\n}\nconsole.log(sumDigits(9875)); // 29</code></pre>\n<blockquote><p><strong>&quot;Leap of faith&quot;:</strong> khi viết bước đệ quy, đừng cố &quot;chạy&quot; trong đầu toàn bộ chuỗi lời gọi. Chỉ cần: (1) base case đúng, (2) giả sử lời gọi nhỏ hơn đã đúng thì kết hợp có đúng không. Đó là quy nạp toán học.</p>\n</blockquote>\n<h2>Call stack</h2>\n<p>Mỗi lời gọi chưa xong nằm trên <strong>call stack</strong>. Đệ quy quá sâu → <code>RangeError: Maximum call stack size exceeded</code> (thường khoảng 10.000 tầng trong JS).</p>\n<pre class=\"code\" data-run><code class=\"language-js\">function depth(n) {\n  return n === 0 ? 0 : 1 + depth(n - 1);\n}\nconsole.log(depth(5000));\ntry {\n  depth(1e6);\n} catch (e) {\n  console.log(e.name + &quot;: &quot; + e.message);\n}</code></pre>\n<p>Vì vậy với dữ liệu lớn (linked list 10^5 node, DFS trên đồ thị lớn), hãy cân nhắc viết lại bằng vòng lặp + stack.</p>\n<h2>Cây đệ quy và chi phí</h2>\n<pre class=\"code\" data-run><code class=\"language-js\">let calls = 0;\nfunction fib(n) {\n  calls++;\n  if (n &lt; 2) return n;\n  return fib(n - 1) + fib(n - 2); // hai nhánh → cây nhị phân lời gọi\n}\nconsole.log(fib(25), &quot;— số lời gọi:&quot;, calls); // ~250.000 lời gọi cho n = 25!</code></pre>\n<p><code>fib(n)</code> ngây thơ là <strong>O(2^n)</strong> vì tính lại cùng một giá trị rất nhiều lần (<code>fib(23)</code> được tính 2 lần, <code>fib(22)</code> 3 lần...). Thêm memo (bài Closure) → O(n). Đó là cầu nối sang <strong>quy hoạch động</strong>.</p>\n<h2>Chia để trị</h2>\n<p>Chia bài toán thành các phần <strong>độc lập</strong>, giải từng phần, rồi gộp. Ví dụ: merge sort (bài Sắp xếp), luỹ thừa nhanh:</p>\n<pre class=\"code\"><code class=\"language-text\">x^n = (x^(n/2))²        nếu n chẵn\nx^n = x · (x^(n/2))²    nếu n lẻ</code></pre>\n<p>Chỉ cần log₂(n) tầng thay vì n phép nhân.</p>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Đệ quy và vòng lặp có sức mạnh tương đương. Khi nào đệ quy làm code <strong>rõ ràng hơn hẳn</strong>? (Gợi ý: cấu trúc tự lồng nhau như cây, JSON, thư mục.)</li><li>Một số ngôn ngữ tối ưu &quot;tail call&quot; để đệ quy không tốn stack. JS (V8) không làm điều đó. Hệ quả thực tế là gì?</li></ul>\n",
+    "source": "content/03-dsa/07-recursion.md",
+    "exercises": [
+     {
+      "id": "fast-power",
+      "title": "Luỹ thừa nhanh (Pow(x, n))",
+      "difficulty": "medium",
+      "prompt": "<p>Tính <code>x^n</code> với <code>n</code> là số nguyên (có thể <strong>âm</strong>, <code>|n|</code> tới 2^31). Không dùng <code>**</code> hay <code>Math.pow</code>. Phải đạt O(log n). (LeetCode 50)</p>\n",
+      "fn": "myPow",
+      "starter": "function myPow(x, n) {\n\n}\n",
+      "solution": "function myPow(x, n) {\n  if (n < 0) return 1 / myPow(x, -n);\n  if (n === 0) return 1;\n  const half = myPow(x, Math.floor(n / 2));\n  return n % 2 === 0 ? half * half : half * half * x;\n}\n",
+      "explain": "<p>Độ sâu đệ quy ~31 với n = 2^31. Lỗi kinh điển: <code>return myPow(x, n/2) * myPow(x, n/2)</code> — đúng nhưng O(n) vì gọi hai lần cùng một thứ.</p>\n",
+      "hints": [
+       "<p>Base case: <code>n === 0</code> → 1. Số mũ âm: <code>x^-n = 1 / x^n</code>.</p>\n",
+       "<p>Tính <code>half = myPow(x, floor(n/2))</code> <strong>một lần</strong> rồi dùng lại; gọi hai lần sẽ thành O(n).</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": "float",
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         2,
+         10
+        ],
+        "expected": 1024
+       },
+       {
+        "args": [
+         2.1,
+         3
+        ],
+        "expected": 9.261
+       },
+       {
+        "args": [
+         2,
+         -2
+        ],
+        "expected": 0.25
+       },
+       {
+        "args": [
+         5,
+         0
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         1.0000001,
+         2147483647
+        ],
+        "expected": 1.8366448196907323e+93,
+        "hidden": true,
+        "label": "n = 2^31 − 1 — cần O(log n)"
+       },
+       {
+        "args": [
+         -2,
+         3
+        ],
+        "expected": -8
+       }
+      ]
+     },
+     {
+      "id": "flatten-deep",
+      "title": "Làm phẳng mảng lồng nhau",
+      "difficulty": "easy",
+      "prompt": "<p>Viết <code>flatten(arr)</code> trả về mảng một chiều chứa mọi phần tử của mảng lồng nhau <strong>nhiều tầng tuỳ ý</strong>, giữ thứ tự. Không dùng <code>arr.flat()</code>.</p>\n<p><code>flatten([1, [2, [3, [4]], 5]])</code> → <code>[1, 2, 3, 4, 5]</code></p>\n",
+      "fn": "flatten",
+      "starter": "function flatten(arr) {\n\n}\n",
+      "solution": "function flatten(arr) {\n  const result = [];\n  for (const item of arr) {\n    if (Array.isArray(item)) {\n      for (const x of flatten(item)) result.push(x);\n    } else {\n      result.push(item);\n    }\n  }\n  return result;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Duyệt từng phần tử: nếu là mảng thì gọi đệ quy <code>flatten(item)</code> và đẩy mọi phần tử của kết quả vào; không thì đẩy chính nó.</p>\n",
+       "<p>Tránh <code>result.push(...flatten(item))</code> khi mảng con rất lớn (giới hạn số tham số).</p>\n"
+      ],
+      "followUp": "<p>Viết lại <strong>không dùng đệ quy</strong> (dùng stack). Thứ tự kết quả có bị đảo không, và sửa thế nào?</p>\n",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          1,
+          [
+           2,
+           [
+            3,
+            [
+             4
+            ]
+           ],
+           5
+          ]
+         ]
+        ],
+        "expected": [
+         1,
+         2,
+         3,
+         4,
+         5
+        ]
+       },
+       {
+        "args": [
+         []
+        ],
+        "expected": []
+       },
+       {
+        "args": [
+         [
+          [
+           []
+          ]
+         ]
+        ],
+        "expected": []
+       },
+       {
+        "args": [
+         [
+          1,
+          2,
+          3
+         ]
+        ],
+        "expected": [
+         1,
+         2,
+         3
+        ]
+       },
+       {
+        "args": [
+         [
+          [
+           "a"
+          ],
+          [
+           [
+            "b",
+            [
+             "c"
+            ]
+           ]
+          ],
+          "d"
+         ]
+        ],
+        "expected": [
+         "a",
+         "b",
+         "c",
+         "d"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "deep-sum",
+      "title": "Tổng các số trong JSON",
+      "difficulty": "medium",
+      "prompt": "<p>Cho một giá trị kiểu JSON (số, chuỗi, boolean, null, mảng, object lồng nhau tuỳ ý). Viết <code>deepSum(value)</code> trả về <strong>tổng mọi số</strong> nằm ở bất kỳ đâu bên trong (bỏ qua chuỗi kể cả chuỗi chứa số).</p>\n<p><code>deepSum({ a: 1, b: [2, { c: 3, d: &quot;4&quot; }], e: null })</code> → <code>6</code></p>\n",
+      "fn": "deepSum",
+      "starter": "function deepSum(value) {\n\n}\n",
+      "solution": "function deepSum(value) {\n  if (typeof value === \"number\") return value;\n  if (value === null || typeof value !== \"object\") return 0;\n  let total = 0;\n  for (const child of Object.values(value)) total += deepSum(child);\n  return total;\n}\n",
+      "explain": "<p>Cấu trúc <strong>tự lồng nhau</strong> (JSON, cây thư mục, DOM) là nơi đệ quy toả sáng: code bám sát định nghĩa dữ liệu. Lưu ý <code>typeof null === &quot;object&quot;</code> — phải loại <code>null</code> trước.</p>\n",
+      "hints": [
+       "<p>Base case: số → trả về chính nó; các kiểu nguyên thuỷ khác (chuỗi, boolean, null) → 0.</p>\n",
+       "<p>Mảng và object đều duyệt được bằng <code>Object.values(value)</code> — gọi đệ quy cho từng phần tử con và cộng lại.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         {
+          "a": 1,
+          "b": [
+           2,
+           {
+            "c": 3,
+            "d": "4"
+           }
+          ],
+          "e": null
+         }
+        ],
+        "expected": 6
+       },
+       {
+        "args": [
+         5
+        ],
+        "expected": 5
+       },
+       {
+        "args": [
+         "10"
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         [
+          [
+           [
+            [
+             1
+            ]
+           ]
+          ],
+          2,
+          [
+           3,
+           [
+            4
+           ]
+          ]
+         ]
+        ],
+        "expected": 10
+       },
+       {
+        "args": [
+         {
+          "x": true,
+          "y": {
+           "z": -5,
+           "w": [
+            1.5
+           ]
+          }
+         }
+        ],
+        "expected": -3.5
+       },
+       {
+        "args": [
+         null
+        ],
+        "expected": 0
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dsa-binary-search",
+    "title": "Tìm kiếm nhị phân (Binary Search)",
+    "html": "<p>Trên dữ liệu <strong>đã sắp xếp</strong>, mỗi bước so sánh với phần tử ở giữa rồi <strong>loại bỏ một nửa</strong>. n = 10^9 cũng chỉ cần ~30 bước: <strong>O(log n)</strong>.</p>\n<h2>Khuôn mẫu chuẩn</h2>\n<pre class=\"code\" data-run><code class=\"language-js\">function binarySearch(nums, target) {\n  let lo = 0, hi = nums.length - 1;\n  while (lo &lt;= hi) {                         // còn ít nhất 1 phần tử\n    const mid = lo + Math.floor((hi - lo) / 2);\n    if (nums[mid] === target) return mid;\n    if (nums[mid] &lt; target) lo = mid + 1;    // target nằm bên phải mid\n    else hi = mid - 1;                        // target nằm bên trái mid\n  }\n  return -1;\n}\nconsole.log(binarySearch([1, 3, 5, 7, 9, 11], 7));  // 3\nconsole.log(binarySearch([1, 3, 5, 7, 9, 11], 4));  // -1</code></pre>\n<p>Binary search nổi tiếng <strong>dễ sai</strong>: lặp vô hạn, sai một phần tử, tràn chỉ số. Cách tránh: chọn một quy ước và giữ <strong>bất biến</strong> (invariant) rõ ràng. Ở trên: &quot;nếu target tồn tại, nó luôn nằm trong <code>[lo, hi]</code>&quot;.</p>\n<h2>Lower bound — vị trí đầu tiên <code>&gt;= target</code></h2>\n<p>Dạng tổng quát hơn, dùng cho &quot;vị trí chèn&quot;, &quot;phần tử đầu tiên thoả điều kiện&quot;:</p>\n<pre class=\"code\" data-run><code class=\"language-js\">function lowerBound(nums, target) {\n  let lo = 0, hi = nums.length;      // chú ý: hi = length (nửa mở [lo, hi))\n  while (lo &lt; hi) {\n    const mid = (lo + hi) &gt;&gt; 1;\n    if (nums[mid] &lt; target) lo = mid + 1;\n    else hi = mid;                   // mid có thể là đáp án → giữ lại\n  }\n  return lo;                         // lo === hi\n}\nconst a = [1, 2, 4, 4, 4, 7];\nconsole.log(lowerBound(a, 4), lowerBound(a, 5), lowerBound(a, 100)); // 2 5 6</code></pre>\n<h2>Ý tưởng mạnh nhất: tìm kiếm nhị phân trên <strong>đáp án</strong></h2>\n<p>Không chỉ dùng trên mảng! Nếu có hàm <code>ok(x)</code> <strong>đơn điệu</strong> — sai, sai, ..., sai, đúng, đúng, ... — thì tìm được <code>x</code> nhỏ nhất làm <code>ok(x)</code> đúng bằng binary search trên miền giá trị của x.</p>\n<pre class=\"code\" data-run><code class=\"language-js\">// Căn bậc hai nguyên: số x lớn nhất với x*x &lt;= n\nfunction isqrt(n) {\n  let lo = 0, hi = n;\n  while (lo &lt; hi) {\n    const mid = Math.ceil((lo + hi) / 2);  // làm tròn LÊN khi lo = mid, tránh lặp vô hạn\n    if (mid * mid &lt;= n) lo = mid;\n    else hi = mid - 1;\n  }\n  return lo;\n}\nconsole.log(isqrt(8), isqrt(16), isqrt(2147395599)); // 2 4 46339</code></pre>\n<p>Dấu hiệu nhận biết: đề hỏi &quot;giá trị <strong>nhỏ nhất/lớn nhất</strong> sao cho ... vẫn khả thi&quot;, và kiểm tra một giá trị cụ thể có khả thi không thì dễ (thường O(n)). Tổng: O(n log(miền giá trị)).</p>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Tại sao viết <code>lo + Math.floor((hi - lo) / 2)</code> thay vì <code>Math.floor((lo + hi) / 2)</code>? Trong JS có thực sự cần không? (Gợi ý: Java/C++ với <code>int</code>.)</li><li>Trong <code>isqrt</code>, nếu dùng <code>Math.floor</code> cho <code>mid</code> thì chuyện gì xảy ra khi <code>hi = lo + 1</code>?</li><li>Binary search cần dữ liệu đã sắp xếp. Nếu chỉ tìm <strong>một lần</strong> trên mảng chưa sắp xếp, sort trước có đáng không?</li></ul>\n",
+    "source": "content/03-dsa/08-binary-search.md",
+    "exercises": [
+     {
+      "id": "binary-search-basic",
+      "title": "Binary Search",
+      "difficulty": "easy",
+      "prompt": "<p><code>nums</code> sắp xếp tăng dần, các phần tử khác nhau. Trả về chỉ số của <code>target</code>, hoặc <code>-1</code>. Phải O(log n) — test ẩn gọi hàm <strong>100.000 lần</strong> trên mảng 10^6 phần tử.</p>\n",
+      "fn": "search",
+      "starter": "function search(nums, target) {\n  return nums.indexOf(target);\n}\n",
+      "solution": "function search(nums, target) {\n  let lo = 0;\n  let hi = nums.length - 1;\n  while (lo <= hi) {\n    const mid = lo + Math.floor((hi - lo) / 2);\n    if (nums[mid] === target) return mid;\n    if (nums[mid] < target) lo = mid + 1;\n    else hi = mid - 1;\n  }\n  return -1;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Khuôn mẫu <code>while (lo &lt;= hi)</code> trong bài học.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          -1,
+          0,
+          3,
+          5,
+          9,
+          12
+         ],
+         9
+        ],
+        "expected": 4
+       },
+       {
+        "args": [
+         [
+          -1,
+          0,
+          3,
+          5,
+          9,
+          12
+         ],
+         2
+        ],
+        "expected": -1
+       },
+       {
+        "args": [
+         [
+          5
+         ],
+         5
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         [],
+         1
+        ],
+        "expected": -1
+       },
+       {
+        "args": [
+         [
+          1,
+          2
+         ],
+         2
+        ],
+        "expected": 1
+       },
+       {
+        "hidden": true,
+        "code": "const a = Array.from({ length: 1000000 }, (_, i) => i * 2); let s = 0; for (let q = 0; q < 100000; q++) s += search(a, 1999998 - q * 2); return s;",
+        "label": "100.000 lần tìm trên mảng 10^6",
+        "expected": 94999950000
+       }
+      ]
+     },
+     {
+      "id": "search-insert",
+      "title": "Vị trí chèn",
+      "difficulty": "easy",
+      "prompt": "<p><code>nums</code> sắp xếp tăng dần (có thể có phần tử <strong>trùng</strong>). Trả về chỉ số <strong>đầu tiên</strong> <code>i</code> sao cho <code>nums[i] &gt;= target</code> (nếu không có, trả về <code>nums.length</code>) — chính là vị trí chèn <code>target</code> để mảng vẫn sắp xếp.</p>\n",
+      "fn": "searchInsert",
+      "starter": "function searchInsert(nums, target) {\n\n}\n",
+      "solution": "function searchInsert(nums, target) {\n  let lo = 0;\n  let hi = nums.length;\n  while (lo < hi) {\n    const mid = (lo + hi) >> 1;\n    if (nums[mid] < target) lo = mid + 1;\n    else hi = mid;\n  }\n  return lo;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Đây là &quot;lower bound&quot;. Dùng khoảng nửa mở <code>[lo, hi)</code> với <code>hi = nums.length</code>.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          1,
+          3,
+          5,
+          6
+         ],
+         5
+        ],
+        "expected": 2
+       },
+       {
+        "args": [
+         [
+          1,
+          3,
+          5,
+          6
+         ],
+         2
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         [
+          1,
+          3,
+          5,
+          6
+         ],
+         7
+        ],
+        "expected": 4
+       },
+       {
+        "args": [
+         [
+          1,
+          3,
+          5,
+          6
+         ],
+         0
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         [
+          2,
+          4,
+          4,
+          4,
+          8
+         ],
+         4
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         [],
+         3
+        ],
+        "expected": 0
+       }
+      ]
+     },
+     {
+      "id": "sqrt-x",
+      "title": "Căn bậc hai nguyên",
+      "difficulty": "easy",
+      "prompt": "<p>Trả về phần nguyên của căn bậc hai của <code>x</code> (<code>0 &lt;= x &lt;= 2^31 - 1</code>). Không dùng <code>Math.sqrt</code> hay <code>**</code>.</p>\n",
+      "fn": "mySqrt",
+      "starter": "function mySqrt(x) {\n\n}\n",
+      "solution": "function mySqrt(x) {\n  let lo = 0;\n  let hi = x;\n  while (lo < hi) {\n    const mid = Math.ceil((lo + hi) / 2);\n    if (mid * mid <= x) lo = mid;\n    else hi = mid - 1;\n  }\n  return lo;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Binary search trên đáp án: tìm <code>m</code> lớn nhất với <code>m * m &lt;= x</code>.</p>\n",
+       "<p>Khi cập nhật <code>lo = mid</code>, phải làm tròn <code>mid</code> <strong>lên</strong> (<code>Math.ceil</code>) để tránh vòng lặp vô hạn.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         4
+        ],
+        "expected": 2
+       },
+       {
+        "args": [
+         8
+        ],
+        "expected": 2
+       },
+       {
+        "args": [
+         0
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         1
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         2147395599
+        ],
+        "expected": 46339
+       },
+       {
+        "args": [
+         2147483647
+        ],
+        "expected": 46340
+       }
+      ]
+     },
+     {
+      "id": "search-rotated",
+      "title": "Tìm trong mảng xoay",
+      "difficulty": "medium",
+      "prompt": "<p>Mảng tăng dần (phần tử khác nhau) đã bị <strong>xoay</strong> tại một điểm chưa biết, VD <code>[0,1,2,4,5,6,7]</code> → <code>[4,5,6,7,0,1,2]</code>. Tìm chỉ số của <code>target</code> hoặc <code>-1</code>, trong O(log n). (LeetCode 33)</p>\n",
+      "fn": "searchRotated",
+      "starter": "function searchRotated(nums, target) {\n\n}\n",
+      "solution": "function searchRotated(nums, target) {\n  let lo = 0;\n  let hi = nums.length - 1;\n  while (lo <= hi) {\n    const mid = (lo + hi) >> 1;\n    if (nums[mid] === target) return mid;\n    if (nums[lo] <= nums[mid]) {\n      if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n      else lo = mid + 1;\n    } else {\n      if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n      else hi = mid - 1;\n    }\n  }\n  return -1;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Tại mỗi <code>mid</code>, <strong>ít nhất một nửa</strong> <code>[lo, mid]</code> hoặc <code>[mid, hi]</code> là đoạn đã sắp xếp bình thường.</p>\n",
+       "<p>Nếu <code>nums[lo] &lt;= nums[mid]</code> thì nửa trái đã sắp xếp: kiểm tra target có nằm trong <code>[nums[lo], nums[mid])</code> không để quyết định đi trái hay phải. Ngược lại xét nửa phải.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          4,
+          5,
+          6,
+          7,
+          0,
+          1,
+          2
+         ],
+         0
+        ],
+        "expected": 4
+       },
+       {
+        "args": [
+         [
+          4,
+          5,
+          6,
+          7,
+          0,
+          1,
+          2
+         ],
+         3
+        ],
+        "expected": -1
+       },
+       {
+        "args": [
+         [
+          1
+         ],
+         0
+        ],
+        "expected": -1
+       },
+       {
+        "args": [
+         [
+          3,
+          1
+         ],
+         1
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         [
+          5,
+          1,
+          3
+         ],
+         5
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         [
+          6,
+          7,
+          1,
+          2,
+          3,
+          4,
+          5
+         ],
+         7
+        ],
+        "expected": 1
+       }
+      ]
+     },
+     {
+      "id": "koko-bananas",
+      "title": "Koko ăn chuối",
+      "difficulty": "medium",
+      "prompt": "<p>Có <code>piles[i]</code> quả chuối ở đống thứ i. Mỗi giờ Koko chọn <strong>một</strong> đống và ăn tối đa <code>k</code> quả (đống ít hơn k thì ăn hết và nghỉ đến hết giờ đó). Tìm <code>k</code> <strong>nhỏ nhất</strong> để ăn hết trong <code>h</code> giờ. (LeetCode 875)</p>\n<p><code>piles.length &lt;= 10^4</code>, <code>piles[i] &lt;= 10^9</code>.</p>\n",
+      "fn": "minEatingSpeed",
+      "starter": "function minEatingSpeed(piles, h) {\n\n}\n",
+      "solution": "function minEatingSpeed(piles, h) {\n  const hoursNeeded = (k) => {\n    let hours = 0;\n    for (const p of piles) hours += Math.ceil(p / k);\n    return hours;\n  };\n  let lo = 1;\n  let hi = 0;\n  for (const p of piles) if (p > hi) hi = p;\n  while (lo < hi) {\n    const mid = Math.floor((lo + hi) / 2);\n    if (hoursNeeded(mid) <= h) hi = mid;\n    else lo = mid + 1;\n  }\n  return lo;\n}\n",
+      "explain": "<p>O(n log M) với M = max(piles). Thử từng k từ 1 trở lên là O(n·M) — với M = 10^9 thì không bao giờ xong. Đây là ví dụ điển hình của &quot;binary search on answer&quot;.</p>\n",
+      "hints": [
+       "<p>Với một tốc độ <code>k</code> cụ thể, số giờ cần = tổng <code>Math.ceil(p / k)</code>. Tốc độ càng lớn, giờ càng ít → <strong>đơn điệu</strong>.</p>\n",
+       "<p>Binary search <code>k</code> trong <code>[1, max(piles)]</code>: tìm k nhỏ nhất mà số giờ cần ≤ h.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          3,
+          6,
+          7,
+          11
+         ],
+         8
+        ],
+        "expected": 4
+       },
+       {
+        "args": [
+         [
+          30,
+          11,
+          23,
+          4,
+          20
+         ],
+         5
+        ],
+        "expected": 30
+       },
+       {
+        "args": [
+         [
+          30,
+          11,
+          23,
+          4,
+          20
+         ],
+         6
+        ],
+        "expected": 23
+       },
+       {
+        "args": [
+         [
+          1000000000
+         ],
+         2
+        ],
+        "expected": 500000000
+       },
+       {
+        "args": [
+         [
+          312884470
+         ],
+         312884469
+        ],
+        "expected": 2
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dsa-sorting",
+    "title": "Sắp xếp",
+    "html": "<p>Trong coding test bạn gần như luôn dùng <code>arr.sort((a, b) =&gt; a - b)</code>. Nhưng phỏng vấn vẫn hỏi cách các thuật toán sắp xếp hoạt động, vì chúng minh hoạ những ý tưởng nền tảng: <strong>chia để trị</strong>, <strong>phân hoạch</strong>, <strong>bất biến vòng lặp</strong>.</p>\n<h2>Bảng tổng hợp</h2>\n<table><thead><tr><th>Thuật toán</th><th>Trung bình</th><th>Xấu nhất</th><th>Bộ nhớ</th><th>Ổn định</th><th>Ghi chú</th></tr></thead>\n<tbody>\n<tr><td>Bubble / Selection</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>B: có / S: không</td><td>chỉ để học</td></tr>\n<tr><td>Insertion</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>có</td><td><strong>rất nhanh khi gần như đã sắp xếp</strong> hoặc n nhỏ</td></tr>\n<tr><td>Merge sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>có</td><td>đảm bảo, dùng cho linked list, external sort</td></tr>\n<tr><td>Quick sort</td><td>O(n log n)</td><td>O(n²)</td><td>O(log n)</td><td>không</td><td>nhanh nhất thực tế nếu chọn pivot tốt</td></tr>\n<tr><td>Heap sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(1)</td><td>không</td><td>ít dùng trực tiếp</td></tr>\n<tr><td>Counting sort</td><td>O(n + k)</td><td>O(n + k)</td><td>O(k)</td><td>có</td><td>khi giá trị nằm trong khoảng nhỏ k</td></tr>\n</tbody></table>\n<p><code>Array.prototype.sort</code> của V8 dùng <strong>TimSort</strong> (lai giữa merge sort và insertion sort): O(n log n), ổn định.</p>\n<blockquote><p><strong>Ổn định (stable)</strong> nghĩa là các phần tử &quot;bằng nhau&quot; giữ nguyên thứ tự ban đầu. Quan trọng khi sắp xếp nhiều lần theo các tiêu chí khác nhau (VD sắp theo tên, rồi sắp theo điểm — người cùng điểm vẫn theo thứ tự tên).</p>\n</blockquote>\n<h2>Insertion sort</h2>\n<pre class=\"code\" data-run><code class=\"language-js\">function insertionSort(a) {\n  for (let i = 1; i &lt; a.length; i++) {\n    const x = a[i];\n    let j = i - 1;\n    while (j &gt;= 0 &amp;&amp; a[j] &gt; x) {   // dời các phần tử lớn hơn sang phải\n      a[j + 1] = a[j];\n      j--;\n    }\n    a[j + 1] = x;                   // bất biến: a[0..i] đã sắp xếp\n  }\n  return a;\n}\nconsole.log(insertionSort([5, 2, 4, 6, 1, 3]));</code></pre>\n<h2>Merge sort — chia để trị</h2>\n<ol><li>Chia mảng làm hai nửa.</li><li>Sắp xếp <strong>đệ quy</strong> mỗi nửa.</li><li><strong>Gộp</strong> hai nửa đã sắp xếp (hai con trỏ, O(n)).</li></ol>\n<p>Có log n tầng, mỗi tầng gộp tổng cộng n phần tử → <strong>O(n log n)</strong>.</p>\n<h2>Quick sort — phân hoạch</h2>\n<ol><li>Chọn <strong>pivot</strong>.</li><li>Phân hoạch: phần tử &lt; pivot sang trái, &gt; pivot sang phải.</li><li>Đệ quy hai phía.</li></ol>\n<pre class=\"code\" data-run><code class=\"language-js\">function quickSort(a, lo = 0, hi = a.length - 1) {\n  if (lo &gt;= hi) return a;\n  const pivot = a[lo + Math.floor(Math.random() * (hi - lo + 1))]; // pivot ngẫu nhiên\n  let i = lo, j = hi;\n  while (i &lt;= j) {                       // phân hoạch Hoare\n    while (a[i] &lt; pivot) i++;\n    while (a[j] &gt; pivot) j--;\n    if (i &lt;= j) {\n      [a[i], a[j]] = [a[j], a[i]];\n      i++; j--;\n    }\n  }\n  quickSort(a, lo, j);\n  quickSort(a, i, hi);\n  return a;\n}\nconsole.log(quickSort([3, 6, 1, 8, 2, 9, 2, 5]));</code></pre>\n<p>Tại sao pivot <strong>ngẫu nhiên</strong>? Nếu luôn chọn phần tử đầu, mảng đã sắp xếp sẵn sẽ khiến mỗi lần chỉ tách được 1 phần tử → O(n²).</p>\n<h2>Sắp xếp như một bước tiền xử lý</h2>\n<p>Rất nhiều bài trở nên dễ sau khi sort: gộp khoảng (merge intervals), tìm cặp (two pointers), loại trùng lặp, tham lam (xếp lịch). Khi bí, hãy hỏi: <strong>&quot;Nếu dữ liệu đã được sắp xếp thì bài này có dễ hơn không?&quot;</strong></p>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Merge sort luôn O(n log n), quick sort xấu nhất O(n²). Vậy tại sao quick sort lại phổ biến hơn trong thực tế? (Gợi ý: bộ nhớ phụ, cache CPU.)</li><li>Tại sao TimSort lại dùng insertion sort cho các đoạn nhỏ, dù insertion sort là O(n²)?</li><li>Có thể sắp xếp nhanh hơn O(n log n) không? Khi nào? (Gợi ý: counting/radix sort không dùng phép so sánh.)</li></ul>\n",
+    "source": "content/03-dsa/09-sorting.md",
+    "exercises": [
+     {
+      "id": "merge-sort",
+      "title": "Cài đặt Merge Sort",
+      "difficulty": "medium",
+      "prompt": "<p>Cài đặt <code>mergeSort(nums)</code> trả về mảng <strong>mới</strong> đã sắp xếp tăng dần. <strong>Không dùng</strong> <code>Array.prototype.sort</code>.</p>\n<p>Test ẩn có 200.000 phần tử — thuật toán O(n²) sẽ quá thời gian.</p>\n",
+      "fn": "mergeSort",
+      "starter": "function mergeSort(nums) {\n\n}\n",
+      "solution": "function mergeSort(nums) {\n  if (nums.length <= 1) return nums.slice();\n  const mid = nums.length >> 1;\n  const left = mergeSort(nums.slice(0, mid));\n  const right = mergeSort(nums.slice(mid));\n  const out = new Array(nums.length);\n  let i = 0, j = 0, k = 0;\n  while (i < left.length && j < right.length) {\n    out[k++] = left[i] <= right[j] ? left[i++] : right[j++];\n  }\n  while (i < left.length) out[k++] = left[i++];\n  while (j < right.length) out[k++] = right[j++];\n  return out;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Base case: mảng 0 hoặc 1 phần tử đã sắp xếp.</p>\n",
+       "<p>Chia: <code>mid = nums.length &gt;&gt; 1</code>; sắp xếp đệ quy <code>nums.slice(0, mid)</code> và <code>nums.slice(mid)</code>.</p>\n",
+       "<p>Gộp hai mảng đã sắp xếp bằng hai con trỏ (xem bài Two Pointers). Dùng <code>&lt;=</code> để giữ tính ổn định.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          5,
+          2,
+          4,
+          6,
+          1,
+          3
+         ]
+        ],
+        "expected": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6
+        ]
+       },
+       {
+        "args": [
+         []
+        ],
+        "expected": []
+       },
+       {
+        "args": [
+         [
+          1
+         ]
+        ],
+        "expected": [
+         1
+        ]
+       },
+       {
+        "args": [
+         [
+          3,
+          -1,
+          3,
+          0,
+          -1
+         ]
+        ],
+        "expected": [
+         -1,
+         -1,
+         0,
+         3,
+         3
+        ]
+       },
+       {
+        "code": "const a = [3, 1, 2]; mergeSort(a); return a;",
+        "label": "không sửa mảng đầu vào",
+        "expected": [
+         3,
+         1,
+         2
+        ]
+       },
+       {
+        "code": "const src = Function.prototype.toString.call(mergeSort); return /\\.sort\\s*\\(/.test(src);",
+        "label": "không dùng .sort()",
+        "expected": false
+       },
+       {
+        "gen": "let x = 12345; return [Array.from({ length: 200000 }, () => (x = (x * 1103515245 + 12345) % 2147483648))];",
+        "check": "if (!Array.isArray(result) || result.length !== 200000) return false; for (let i = 1; i < result.length; i++) if (result[i - 1] > result[i]) return false; return true;",
+        "label": "n = 200.000 ngẫu nhiên",
+        "expectedText": "mảng 200.000 phần tử tăng dần"
+       }
+      ]
+     },
+     {
+      "id": "sort-colors",
+      "title": "Sort Colors (cờ Hà Lan)",
+      "difficulty": "medium",
+      "prompt": "<p>Mảng chỉ chứa <code>0</code>, <code>1</code>, <code>2</code>. Sắp xếp <strong>in-place</strong> trong <strong>một lần duyệt</strong>, O(1) bộ nhớ, không dùng <code>sort</code>. Hàm không cần trả về gì (test kiểm tra mảng sau khi gọi). (LeetCode 75)</p>\n",
+      "fn": "sortColors",
+      "starter": "function sortColors(nums) {\n\n}\n",
+      "solution": "function sortColors(nums) {\n  let low = 0;\n  let mid = 0;\n  let high = nums.length - 1;\n  while (mid <= high) {\n    if (nums[mid] === 0) {\n      [nums[low], nums[mid]] = [nums[mid], nums[low]];\n      low++;\n      mid++;\n    } else if (nums[mid] === 1) {\n      mid++;\n    } else {\n      [nums[mid], nums[high]] = [nums[high], nums[mid]];\n      high--;\n    }\n  }\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Cách dễ (hai lần duyệt): đếm số 0, 1, 2 rồi ghi lại — counting sort.</p>\n",
+       "<p>Một lần duyệt: ba con trỏ <code>low</code>, <code>mid</code>, <code>high</code>. Bất biến: <code>[0, low)</code> toàn 0, <code>[low, mid)</code> toàn 1, <code>(high, end]</code> toàn 2.</p>\n",
+       "<p>Gặp 2 và đổi với <code>high</code> thì <strong>không tăng <code>mid</code></strong> — phần tử vừa đổi về chưa được xét.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "code": "const a = [2, 0, 2, 1, 1, 0]; sortColors(a); return a;",
+        "label": "[2,0,2,1,1,0]",
+        "expected": [
+         0,
+         0,
+         1,
+         1,
+         2,
+         2
+        ]
+       },
+       {
+        "code": "const a = [2, 0, 1]; sortColors(a); return a;",
+        "label": "[2,0,1]",
+        "expected": [
+         0,
+         1,
+         2
+        ]
+       },
+       {
+        "code": "const a = [0]; sortColors(a); return a;",
+        "label": "[0]",
+        "expected": [
+         0
+        ]
+       },
+       {
+        "code": "const a = [2, 2, 1, 1, 0, 0]; sortColors(a); return a;",
+        "label": "giảm dần",
+        "expected": [
+         0,
+         0,
+         1,
+         1,
+         2,
+         2
+        ]
+       }
+      ]
+     },
+     {
+      "id": "merge-intervals",
+      "title": "Merge Intervals",
+      "difficulty": "medium",
+      "prompt": "<p>Cho mảng các khoảng <code>[start, end]</code>, gộp mọi khoảng <strong>chồng lấn</strong> (kể cả chạm nhau như <code>[1,4]</code> và <code>[4,5]</code>) và trả về các khoảng không chồng lấn, <strong>sắp theo start</strong>. (LeetCode 56)</p>\n<p><code>[[1,3],[2,6],[8,10],[15,18]]</code> → <code>[[1,6],[8,10],[15,18]]</code></p>\n",
+      "fn": "merge",
+      "starter": "function merge(intervals) {\n\n}\n",
+      "solution": "function merge(intervals) {\n  const sorted = [...intervals].sort((a, b) => a[0] - b[0]);\n  const result = [];\n  for (const [start, end] of sorted) {\n    const last = result[result.length - 1];\n    if (last && start <= last[1]) {\n      last[1] = Math.max(last[1], end);\n    } else {\n      result.push([start, end]);\n    }\n  }\n  return result;\n}\n",
+      "explain": "<p>O(n log n) do sort. Lỗi hay gặp: quên <code>Math.max</code> — khoảng <code>[1,10]</code> gộp với <code>[2,3]</code> phải giữ end = 10.</p>\n",
+      "hints": [
+       "<p>Sắp xếp theo <code>start</code>. Sau đó các khoảng chồng lấn sẽ nằm <strong>liền nhau</strong>.</p>\n",
+       "<p>Duyệt và so với khoảng cuối cùng trong kết quả: nếu <code>start &lt;= last.end</code> thì mở rộng <code>last.end = max(last.end, end)</code>, không thì thêm khoảng mới.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          [
+           1,
+           3
+          ],
+          [
+           2,
+           6
+          ],
+          [
+           8,
+           10
+          ],
+          [
+           15,
+           18
+          ]
+         ]
+        ],
+        "expected": [
+         [
+          1,
+          6
+         ],
+         [
+          8,
+          10
+         ],
+         [
+          15,
+          18
+         ]
+        ]
+       },
+       {
+        "args": [
+         [
+          [
+           1,
+           4
+          ],
+          [
+           4,
+           5
+          ]
+         ]
+        ],
+        "expected": [
+         [
+          1,
+          5
+         ]
+        ]
+       },
+       {
+        "args": [
+         [
+          [
+           1,
+           10
+          ],
+          [
+           2,
+           3
+          ]
+         ]
+        ],
+        "expected": [
+         [
+          1,
+          10
+         ]
+        ]
+       },
+       {
+        "args": [
+         [
+          [
+           5,
+           6
+          ],
+          [
+           1,
+           2
+          ]
+         ]
+        ],
+        "expected": [
+         [
+          1,
+          2
+         ],
+         [
+          5,
+          6
+         ]
+        ]
+       },
+       {
+        "args": [
+         []
+        ],
+        "expected": []
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dsa-trees",
+    "title": "Cây nhị phân (Binary Tree)",
+    "html": "<p>Mỗi node có tối đa <strong>hai con</strong>: <code>left</code> và <code>right</code>. Cây là chủ đề phỏng vấn <strong>phổ biến nhất</strong> sau mảng/chuỗi, và gần như mọi bài đều giải bằng đệ quy theo cùng một khuôn.</p>\n<pre class=\"code\"><code class=\"language-js\">class TreeNode {\n  constructor(val, left = null, right = null) {\n    this.val = val;\n    this.left = left;\n    this.right = right;\n  }\n}\n//        1\n//       / \\\n//      2   3\n//     / \\\n//    4   5</code></pre>\n<h2>Khuôn đệ quy trên cây</h2>\n<blockquote><p>Đáp án cho cây gốc <code>root</code> = <strong>kết hợp</strong>(đáp án cây con trái, đáp án cây con phải, <code>root.val</code>). Base case: <code>root === null</code>.</p>\n</blockquote>\n<pre class=\"code\" data-run><code class=\"language-js\">class TreeNode { constructor(v, l = null, r = null) { this.val = v; this.left = l; this.right = r; } }\nconst root = new TreeNode(1, new TreeNode(2, new TreeNode(4), new TreeNode(5)), new TreeNode(3));\n\nconst countNodes = (n) =&gt; (n === null ? 0 : 1 + countNodes(n.left) + countNodes(n.right));\nconst sumTree = (n) =&gt; (n === null ? 0 : n.val + sumTree(n.left) + sumTree(n.right));\nconst height = (n) =&gt; (n === null ? 0 : 1 + Math.max(height(n.left), height(n.right)));\n\nconsole.log(countNodes(root), sumTree(root), height(root)); // 5 15 3</code></pre>\n<h2>Duyệt theo chiều sâu (DFS): 3 thứ tự</h2>\n<pre class=\"code\" data-run><code class=\"language-js\">class TreeNode { constructor(v, l = null, r = null) { this.val = v; this.left = l; this.right = r; } }\nconst root = new TreeNode(1, new TreeNode(2, new TreeNode(4), new TreeNode(5)), new TreeNode(3));\n\nconst pre = [], ino = [], post = [];\nfunction dfs(n) {\n  if (!n) return;\n  pre.push(n.val);   // preorder: gốc → trái → phải\n  dfs(n.left);\n  ino.push(n.val);   // inorder: trái → gốc → phải\n  dfs(n.right);\n  post.push(n.val);  // postorder: trái → phải → gốc\n}\ndfs(root);\nconsole.log(&quot;pre &quot;, pre);   // [1, 2, 4, 5, 3]\nconsole.log(&quot;in  &quot;, ino);   // [4, 2, 5, 1, 3]\nconsole.log(&quot;post&quot;, post);  // [4, 5, 2, 3, 1]</code></pre>\n<ul><li><strong>Preorder</strong>: sao chép cây, in cấu trúc thư mục.</li><li><strong>Inorder</strong>: trên <strong>BST</strong> cho ra dãy <strong>tăng dần</strong>.</li><li><strong>Postorder</strong>: cần kết quả của con trước khi xử lý cha (tính chiều cao, xoá cây).</li></ul>\n<h2>Duyệt theo chiều rộng (BFS) — từng tầng</h2>\n<pre class=\"code\" data-run><code class=\"language-js\">class TreeNode { constructor(v, l = null, r = null) { this.val = v; this.left = l; this.right = r; } }\nconst root = new TreeNode(1, new TreeNode(2, new TreeNode(4), new TreeNode(5)), new TreeNode(3));\n\nfunction levels(root) {\n  if (!root) return [];\n  const result = [];\n  let current = [root];\n  while (current.length) {\n    result.push(current.map((n) =&gt; n.val));\n    const next = [];\n    for (const n of current) {\n      if (n.left) next.push(n.left);\n      if (n.right) next.push(n.right);\n    }\n    current = next;\n  }\n  return result;\n}\nconsole.log(levels(root)); // [[1], [2, 3], [4, 5]]</code></pre>\n<p>BFS dùng cho: duyệt theo tầng, <strong>đường đi ngắn nhất</strong> (số cạnh ít nhất), node gần gốc nhất thoả điều kiện.</p>\n<h2>Cây nhị phân tìm kiếm (BST)</h2>\n<p>Với mọi node: <strong>mọi</strong> giá trị cây con trái &lt; node &lt; <strong>mọi</strong> giá trị cây con phải. Tìm/chèn/xoá O(h) với h là chiều cao: O(log n) nếu cây cân bằng, O(n) nếu cây lệch (thành &quot;linked list&quot;).</p>\n<h2>Định dạng trong bài tập</h2>\n<p>Cây được cho dưới dạng mảng <strong>theo tầng</strong> kiểu LeetCode, <code>null</code> là vị trí trống: <code>[3, 9, 20, null, null, 15, 7]</code> là</p>\n<pre class=\"code\"><code class=\"language-text\">    3\n   / \\\n  9  20\n     / \\\n    15  7</code></pre>\n<p>Hàm <code>buildTree(arr)</code> và <code>toArray(root)</code> đã có sẵn trong mỗi bài.</p>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>DFS đệ quy dùng O(h) bộ nhớ (call stack), BFS dùng O(w) (w = số node ở tầng rộng nhất). Với cây cân bằng hoàn hảo, cái nào tốn hơn? Với cây lệch thì sao?</li><li>Tại sao kiểm tra BST chỉ bằng <code>node.left.val &lt; node.val &lt; node.right.val</code> là <strong>sai</strong>? Tìm một phản ví dụ.</li></ul>\n",
+    "source": "content/03-dsa/10-trees.md",
+    "exercises": [
+     {
+      "id": "max-depth",
+      "title": "Chiều sâu lớn nhất",
+      "difficulty": "easy",
+      "prompt": "<p>Trả về số node trên đường đi dài nhất từ gốc tới lá. Cây rỗng có độ sâu 0. (LeetCode 104)</p>\n",
+      "fn": "maxDepth",
+      "starter": "function maxDepth(root) {\n\n}\n",
+      "solution": "function maxDepth(root) {\n  if (root === null) return 0;\n  return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Khuôn đệ quy: rỗng → 0; còn lại → 1 + max(độ sâu trái, độ sâu phải).</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "class TreeNode {\n  constructor(val, left = null, right = null) {\n    this.val = val;\n    this.left = left;\n    this.right = right;\n  }\n}\n// buildTree([3, 9, 20, null, null, 15, 7]) → cây theo định dạng tầng của LeetCode\nfunction buildTree(arr) {\n  if (!arr.length || arr[0] === null) return null;\n  const root = new TreeNode(arr[0]);\n  const queue = [root];\n  let i = 1;\n  for (let head = 0; head < queue.length && i < arr.length; head++) {\n    const node = queue[head];\n    if (i < arr.length && arr[i] !== null) queue.push((node.left = new TreeNode(arr[i])));\n    i++;\n    if (i < arr.length && arr[i] !== null) queue.push((node.right = new TreeNode(arr[i])));\n    i++;\n  }\n  return root;\n}\n// toArray(root) → mảng theo tầng (bỏ các null ở cuối)\nfunction toArray(root) {\n  const out = [];\n  const queue = [root];\n  for (let head = 0; head < queue.length; head++) {\n    const node = queue[head];\n    if (node) {\n      out.push(node.val);\n      queue.push(node.left, node.right);\n    } else {\n      out.push(null);\n    }\n  }\n  while (out.length && out[out.length - 1] === null) out.pop();\n  return out;\n}",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "code": "return maxDepth(buildTree([3, 9, 20, null, null, 15, 7]));",
+        "label": "[3,9,20,null,null,15,7]",
+        "expected": 3
+       },
+       {
+        "code": "return maxDepth(buildTree([1, null, 2]));",
+        "label": "[1,null,2]",
+        "expected": 2
+       },
+       {
+        "code": "return maxDepth(null);",
+        "label": "cây rỗng",
+        "expected": 0
+       },
+       {
+        "code": "return maxDepth(buildTree([1, 2, null, 3, null, 4]));",
+        "label": "cây lệch trái",
+        "expected": 4
+       }
+      ]
+     },
+     {
+      "id": "invert-tree",
+      "title": "Lật cây (Invert Binary Tree)",
+      "difficulty": "easy",
+      "prompt": "<p>Lật cây theo gương: đổi chỗ con trái và con phải ở <strong>mọi</strong> node. Trả về gốc. (LeetCode 226)</p>\n",
+      "fn": "invertTree",
+      "starter": "function invertTree(root) {\n\n}\n",
+      "solution": "function invertTree(root) {\n  if (root === null) return null;\n  const left = invertTree(root.left);\n  root.left = invertTree(root.right);\n  root.right = left;\n  return root;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Lật cây con trái, lật cây con phải, rồi đổi chỗ chúng. Nhớ lưu tạm một bên trước khi gán đè.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "class TreeNode {\n  constructor(val, left = null, right = null) {\n    this.val = val;\n    this.left = left;\n    this.right = right;\n  }\n}\n// buildTree([3, 9, 20, null, null, 15, 7]) → cây theo định dạng tầng của LeetCode\nfunction buildTree(arr) {\n  if (!arr.length || arr[0] === null) return null;\n  const root = new TreeNode(arr[0]);\n  const queue = [root];\n  let i = 1;\n  for (let head = 0; head < queue.length && i < arr.length; head++) {\n    const node = queue[head];\n    if (i < arr.length && arr[i] !== null) queue.push((node.left = new TreeNode(arr[i])));\n    i++;\n    if (i < arr.length && arr[i] !== null) queue.push((node.right = new TreeNode(arr[i])));\n    i++;\n  }\n  return root;\n}\n// toArray(root) → mảng theo tầng (bỏ các null ở cuối)\nfunction toArray(root) {\n  const out = [];\n  const queue = [root];\n  for (let head = 0; head < queue.length; head++) {\n    const node = queue[head];\n    if (node) {\n      out.push(node.val);\n      queue.push(node.left, node.right);\n    } else {\n      out.push(null);\n    }\n  }\n  while (out.length && out[out.length - 1] === null) out.pop();\n  return out;\n}",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "code": "return toArray(invertTree(buildTree([4, 2, 7, 1, 3, 6, 9])));",
+        "label": "[4,2,7,1,3,6,9]",
+        "expected": [
+         4,
+         7,
+         2,
+         9,
+         6,
+         3,
+         1
+        ]
+       },
+       {
+        "code": "return toArray(invertTree(buildTree([2, 1, 3])));",
+        "label": "[2,1,3]",
+        "expected": [
+         2,
+         3,
+         1
+        ]
+       },
+       {
+        "code": "return invertTree(null);",
+        "label": "cây rỗng",
+        "expected": null
+       },
+       {
+        "code": "return toArray(invertTree(buildTree([1, 2])));",
+        "label": "[1,2]",
+        "expected": [
+         1,
+         null,
+         2
+        ]
+       }
+      ]
+     },
+     {
+      "id": "inorder-iterative",
+      "title": "Duyệt inorder không đệ quy",
+      "difficulty": "medium",
+      "prompt": "<p>Trả về mảng giá trị theo thứ tự <strong>inorder</strong> (trái → gốc → phải), <strong>không dùng đệ quy</strong>. Test có cây lệch sâu 100.000 tầng — đệ quy sẽ tràn stack.</p>\n",
+      "fn": "inorderTraversal",
+      "starter": "function inorderTraversal(root) {\n  const result = [];\n  function dfs(node) {\n    if (!node) return;\n    dfs(node.left);\n    result.push(node.val);\n    dfs(node.right);\n  }\n  dfs(root);\n  return result;\n}\n",
+      "solution": "function inorderTraversal(root) {\n  const result = [];\n  const stack = [];\n  let node = root;\n  while (node || stack.length) {\n    while (node) {\n      stack.push(node);\n      node = node.left;\n    }\n    node = stack.pop();\n    result.push(node.val);\n    node = node.right;\n  }\n  return result;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Tự quản lý stack: đi sang trái hết mức, đẩy từng node vào stack.</p>\n",
+       "<p>Pop một node → ghi giá trị → chuyển sang cây con phải của nó và lặp lại.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "class TreeNode {\n  constructor(val, left = null, right = null) {\n    this.val = val;\n    this.left = left;\n    this.right = right;\n  }\n}\n// buildTree([3, 9, 20, null, null, 15, 7]) → cây theo định dạng tầng của LeetCode\nfunction buildTree(arr) {\n  if (!arr.length || arr[0] === null) return null;\n  const root = new TreeNode(arr[0]);\n  const queue = [root];\n  let i = 1;\n  for (let head = 0; head < queue.length && i < arr.length; head++) {\n    const node = queue[head];\n    if (i < arr.length && arr[i] !== null) queue.push((node.left = new TreeNode(arr[i])));\n    i++;\n    if (i < arr.length && arr[i] !== null) queue.push((node.right = new TreeNode(arr[i])));\n    i++;\n  }\n  return root;\n}\n// toArray(root) → mảng theo tầng (bỏ các null ở cuối)\nfunction toArray(root) {\n  const out = [];\n  const queue = [root];\n  for (let head = 0; head < queue.length; head++) {\n    const node = queue[head];\n    if (node) {\n      out.push(node.val);\n      queue.push(node.left, node.right);\n    } else {\n      out.push(null);\n    }\n  }\n  while (out.length && out[out.length - 1] === null) out.pop();\n  return out;\n}",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "code": "return inorderTraversal(buildTree([1, null, 2, 3]));",
+        "label": "[1,null,2,3]",
+        "expected": [
+         1,
+         3,
+         2
+        ]
+       },
+       {
+        "code": "return inorderTraversal(buildTree([4, 2, 6, 1, 3, 5, 7]));",
+        "label": "BST [4,2,6,1,3,5,7]",
+        "expected": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7
+        ]
+       },
+       {
+        "code": "return inorderTraversal(null);",
+        "label": "cây rỗng",
+        "expected": []
+       },
+       {
+        "hidden": true,
+        "code": "let root = null; for (let i = 0; i < 100000; i++) root = new TreeNode(i, root); const r = inorderTraversal(root); return r.length === 100000 && r[0] === 0 && r[99999] === 99999;",
+        "label": "cây lệch 100.000 tầng",
+        "expected": true
+       }
+      ]
+     },
+     {
+      "id": "level-order",
+      "title": "Duyệt theo tầng",
+      "difficulty": "medium",
+      "prompt": "<p>Trả về giá trị các node theo từng tầng, từ trái sang phải: mảng các mảng. (LeetCode 102)</p>\n<p><code>[3,9,20,null,null,15,7]</code> → <code>[[3],[9,20],[15,7]]</code></p>\n",
+      "fn": "levelOrder",
+      "starter": "function levelOrder(root) {\n\n}\n",
+      "solution": "function levelOrder(root) {\n  if (!root) return [];\n  const result = [];\n  const queue = [root];\n  let head = 0;\n  while (head < queue.length) {\n    const levelSize = queue.length - head;\n    const level = [];\n    for (let i = 0; i < levelSize; i++) {\n      const node = queue[head++];\n      level.push(node.val);\n      if (node.left) queue.push(node.left);\n      if (node.right) queue.push(node.right);\n    }\n    result.push(level);\n  }\n  return result;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>BFS bằng queue. Mẹo tách tầng: trước khi xử lý mỗi tầng, ghi lại số node đang có trong queue — đó là kích thước tầng hiện tại.</p>\n",
+       "<p>Hoặc dùng hai mảng <code>current</code> và <code>next</code> như trong bài học.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "class TreeNode {\n  constructor(val, left = null, right = null) {\n    this.val = val;\n    this.left = left;\n    this.right = right;\n  }\n}\n// buildTree([3, 9, 20, null, null, 15, 7]) → cây theo định dạng tầng của LeetCode\nfunction buildTree(arr) {\n  if (!arr.length || arr[0] === null) return null;\n  const root = new TreeNode(arr[0]);\n  const queue = [root];\n  let i = 1;\n  for (let head = 0; head < queue.length && i < arr.length; head++) {\n    const node = queue[head];\n    if (i < arr.length && arr[i] !== null) queue.push((node.left = new TreeNode(arr[i])));\n    i++;\n    if (i < arr.length && arr[i] !== null) queue.push((node.right = new TreeNode(arr[i])));\n    i++;\n  }\n  return root;\n}\n// toArray(root) → mảng theo tầng (bỏ các null ở cuối)\nfunction toArray(root) {\n  const out = [];\n  const queue = [root];\n  for (let head = 0; head < queue.length; head++) {\n    const node = queue[head];\n    if (node) {\n      out.push(node.val);\n      queue.push(node.left, node.right);\n    } else {\n      out.push(null);\n    }\n  }\n  while (out.length && out[out.length - 1] === null) out.pop();\n  return out;\n}",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "code": "return levelOrder(buildTree([3, 9, 20, null, null, 15, 7]));",
+        "label": "[3,9,20,null,null,15,7]",
+        "expected": [
+         [
+          3
+         ],
+         [
+          9,
+          20
+         ],
+         [
+          15,
+          7
+         ]
+        ]
+       },
+       {
+        "code": "return levelOrder(buildTree([1]));",
+        "label": "[1]",
+        "expected": [
+         [
+          1
+         ]
+        ]
+       },
+       {
+        "code": "return levelOrder(null);",
+        "label": "cây rỗng",
+        "expected": []
+       },
+       {
+        "code": "return levelOrder(buildTree([1, 2, 3, 4, null, null, 5]));",
+        "label": "[1,2,3,4,null,null,5]",
+        "expected": [
+         [
+          1
+         ],
+         [
+          2,
+          3
+         ],
+         [
+          4,
+          5
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "validate-bst",
+      "title": "Kiểm tra BST",
+      "difficulty": "medium",
+      "prompt": "<p>Kiểm tra cây có phải <strong>cây nhị phân tìm kiếm</strong> hợp lệ không: với mọi node, <strong>toàn bộ</strong> cây con trái &lt; node &lt; <strong>toàn bộ</strong> cây con phải (nghiêm ngặt). (LeetCode 98)</p>\n",
+      "fn": "isValidBST",
+      "starter": "function isValidBST(root) {\n\n}\n",
+      "solution": "function isValidBST(root, low = -Infinity, high = Infinity) {\n  if (root === null) return true;\n  if (root.val <= low || root.val >= high) return false;\n  return isValidBST(root.left, low, root.val) && isValidBST(root.right, root.val, high);\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>So sánh mỗi node chỉ với con trực tiếp là <strong>chưa đủ</strong>: <code>[5,4,6,null,null,3,7]</code> — 3 nằm bên phải 5 nhưng nhỏ hơn 5.</p>\n",
+       "<p>Truyền xuống <strong>khoảng hợp lệ</strong> <code>(low, high)</code>: đi sang trái thì cận trên thành giá trị node; sang phải thì cận dưới thành giá trị node.</p>\n",
+       "<p>Cách khác: duyệt inorder và kiểm tra dãy tăng nghiêm ngặt.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "class TreeNode {\n  constructor(val, left = null, right = null) {\n    this.val = val;\n    this.left = left;\n    this.right = right;\n  }\n}\n// buildTree([3, 9, 20, null, null, 15, 7]) → cây theo định dạng tầng của LeetCode\nfunction buildTree(arr) {\n  if (!arr.length || arr[0] === null) return null;\n  const root = new TreeNode(arr[0]);\n  const queue = [root];\n  let i = 1;\n  for (let head = 0; head < queue.length && i < arr.length; head++) {\n    const node = queue[head];\n    if (i < arr.length && arr[i] !== null) queue.push((node.left = new TreeNode(arr[i])));\n    i++;\n    if (i < arr.length && arr[i] !== null) queue.push((node.right = new TreeNode(arr[i])));\n    i++;\n  }\n  return root;\n}\n// toArray(root) → mảng theo tầng (bỏ các null ở cuối)\nfunction toArray(root) {\n  const out = [];\n  const queue = [root];\n  for (let head = 0; head < queue.length; head++) {\n    const node = queue[head];\n    if (node) {\n      out.push(node.val);\n      queue.push(node.left, node.right);\n    } else {\n      out.push(null);\n    }\n  }\n  while (out.length && out[out.length - 1] === null) out.pop();\n  return out;\n}",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "code": "return isValidBST(buildTree([2, 1, 3]));",
+        "label": "[2,1,3]",
+        "expected": true
+       },
+       {
+        "code": "return isValidBST(buildTree([5, 1, 4, null, null, 3, 6]));",
+        "label": "[5,1,4,null,null,3,6]",
+        "expected": false
+       },
+       {
+        "code": "return isValidBST(buildTree([5, 4, 6, null, null, 3, 7]));",
+        "label": "[5,4,6,null,null,3,7] (3 < 5 nằm bên phải)",
+        "expected": false
+       },
+       {
+        "code": "return isValidBST(buildTree([2, 2, 2]));",
+        "label": "giá trị bằng nhau",
+        "expected": false
+       },
+       {
+        "code": "return isValidBST(null);",
+        "label": "cây rỗng",
+        "expected": true
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dsa-heap",
+    "title": "Heap / Priority Queue",
+    "html": "<p><strong>Heap</strong> (đống) cho phép: thêm phần tử O(log n), lấy phần tử <strong>nhỏ nhất</strong> (min-heap) hoặc lớn nhất (max-heap) O(log n), xem nó O(1).</p>\n<p>JS <strong>không có sẵn</strong> heap — và rất nhiều bài phỏng vấn cần nó (top K, Dijkstra, gộp k danh sách, lịch trình). Hãy viết đến mức <strong>thuộc lòng</strong>.</p>\n<h2>Cấu trúc: cây nhị phân hoàn chỉnh lưu trong mảng</h2>\n<ul><li>Node ở vị trí <code>i</code> có con trái <code>2i + 1</code>, con phải <code>2i + 2</code>, cha <code>(i - 1) &gt;&gt; 1</code>.</li><li><strong>Tính chất heap</strong>: cha ≤ các con (min-heap). Phần tử nhỏ nhất luôn ở <code>heap[0]</code>.</li></ul>\n<pre class=\"code\"><code class=\"language-text\">mảng:   [1, 3, 2, 7, 4, 5]\n             1\n           /   \\\n          3     2\n         / \\   /\n        7   4 5</code></pre>\n<h2>Hai thao tác cốt lõi</h2>\n<ul><li><strong>push</strong>: thêm vào cuối, rồi <strong>nổi lên</strong> (sift up): đổi chỗ với cha khi còn nhỏ hơn cha.</li><li><strong>pop</strong>: lấy <code>heap[0]</code>, đưa phần tử cuối lên gốc, rồi <strong>chìm xuống</strong> (sift down): đổi chỗ với con nhỏ hơn khi còn lớn hơn con.</li></ul>\n<p>Cây hoàn chỉnh có chiều cao log n → mỗi thao tác O(log n).</p>\n<pre class=\"code\" data-run><code class=\"language-js\">class MinHeap {\n  constructor(compare = (a, b) =&gt; a - b) {\n    this.data = [];\n    this.compare = compare;          // dùng comparator → biến thành max-heap hoặc heap của object\n  }\n  get size() { return this.data.length; }\n  peek() { return this.data[0]; }\n  push(x) {\n    const d = this.data;\n    d.push(x);\n    let i = d.length - 1;\n    while (i &gt; 0) {\n      const p = (i - 1) &gt;&gt; 1;\n      if (this.compare(d[i], d[p]) &gt;= 0) break;\n      [d[i], d[p]] = [d[p], d[i]];\n      i = p;\n    }\n  }\n  pop() {\n    const d = this.data;\n    if (d.length === 0) return undefined;\n    const top = d[0];\n    const last = d.pop();\n    if (d.length &gt; 0) {\n      d[0] = last;\n      let i = 0;\n      for (;;) {\n        const l = 2 * i + 1, r = l + 1;\n        let m = i;\n        if (l &lt; d.length &amp;&amp; this.compare(d[l], d[m]) &lt; 0) m = l;\n        if (r &lt; d.length &amp;&amp; this.compare(d[r], d[m]) &lt; 0) m = r;\n        if (m === i) break;\n        [d[i], d[m]] = [d[m], d[i]];\n        i = m;\n      }\n    }\n    return top;\n  }\n}\n\nconst h = new MinHeap();\n[5, 1, 8, 3, 2].forEach((x) =&gt; h.push(x));\nconst out = [];\nwhile (h.size) out.push(h.pop());\nconsole.log(out); // [1, 2, 3, 5, 8]\n\nconst maxHeap = new MinHeap((a, b) =&gt; b - a);    // max-heap\n[5, 1, 8].forEach((x) =&gt; maxHeap.push(x));\nconsole.log(maxHeap.pop());                        // 8\n\nconst tasks = new MinHeap((a, b) =&gt; a.priority - b.priority);\ntasks.push({ name: &quot;email&quot;, priority: 3 });\ntasks.push({ name: &quot;bug gấp&quot;, priority: 1 });\nconsole.log(tasks.pop().name);                     // &quot;bug gấp&quot;</code></pre>\n<h2>Mẫu &quot;Top K&quot; với heap kích thước k</h2>\n<p>Tìm k phần tử <strong>lớn nhất</strong>: giữ một <strong>min-heap</strong> kích thước k. Mỗi phần tử mới: push vào; nếu heap vượt k thì pop phần tử nhỏ nhất ra. Cuối cùng heap chứa k phần tử lớn nhất, <code>peek()</code> chính là phần tử lớn thứ k.</p>\n<ul><li>O(n log k) thời gian, O(k) bộ nhớ — tốt hơn sort O(n log n) khi k nhỏ, và chạy được trên <strong>stream</strong> dữ liệu vô hạn.</li></ul>\n<h2>Khi nào dùng heap?</h2>\n<ul><li>&quot;K lớn nhất / nhỏ nhất / gần nhất / phổ biến nhất&quot;.</li><li>Liên tục cần lấy phần tử &quot;tốt nhất&quot; trong khi tập hợp <strong>thay đổi</strong>: Dijkstra, lập lịch, mô phỏng sự kiện.</li><li>Gộp k dãy đã sắp xếp.</li><li>Trung vị của luồng dữ liệu (hai heap).</li></ul>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Sorted array cũng lấy min O(1). Tại sao vẫn cần heap? (So sánh chi phí <strong>thêm</strong> phần tử.)</li><li>Tìm phần tử lớn thứ k: heap O(n log k), quickselect trung bình O(n). Vì sao trong phỏng vấn người ta vẫn hay chọn heap?</li><li>Xây heap từ n phần tử có sẵn có thể làm trong O(n) chứ không phải O(n log n). Tại sao? (Tìm hiểu &quot;heapify&quot;.)</li></ul>\n",
+    "source": "content/03-dsa/11-heap.md",
+    "exercises": [
+     {
+      "id": "implement-min-heap",
+      "title": "Tự cài đặt MinHeap",
+      "difficulty": "medium",
+      "prompt": "<p>Cài đặt class <code>MinHeap</code> với:</p>\n<ul><li><code>push(x)</code>: O(log n)</li><li><code>pop()</code>: lấy ra và trả về phần tử nhỏ nhất, O(log n). Heap rỗng → <code>undefined</code></li><li><code>peek()</code>: xem phần tử nhỏ nhất, O(1)</li><li>getter <code>size</code></li></ul>\n<p>Cố gắng tự viết <strong>không nhìn</strong> code trong bài học. Test ẩn thực hiện 200.000 thao tác.</p>\n",
+      "fn": null,
+      "starter": "class MinHeap {\n  constructor() {\n    this.data = [];\n  }\n  get size() {\n    return this.data.length;\n  }\n  peek() {\n\n  }\n  push(x) {\n\n  }\n  pop() {\n\n  }\n}\n",
+      "solution": "class MinHeap {\n  constructor() {\n    this.data = [];\n  }\n  get size() {\n    return this.data.length;\n  }\n  peek() {\n    return this.data[0];\n  }\n  push(x) {\n    const d = this.data;\n    d.push(x);\n    let i = d.length - 1;\n    while (i > 0) {\n      const p = (i - 1) >> 1;\n      if (d[p] <= d[i]) break;\n      [d[i], d[p]] = [d[p], d[i]];\n      i = p;\n    }\n  }\n  pop() {\n    const d = this.data;\n    if (d.length === 0) return undefined;\n    const top = d[0];\n    const last = d.pop();\n    if (d.length > 0) {\n      d[0] = last;\n      let i = 0;\n      while (true) {\n        const l = 2 * i + 1;\n        const r = l + 1;\n        let m = i;\n        if (l < d.length && d[l] < d[m]) m = l;\n        if (r < d.length && d[r] < d[m]) m = r;\n        if (m === i) break;\n        [d[i], d[m]] = [d[m], d[i]];\n        i = m;\n      }\n    }\n    return top;\n  }\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Chỉ số: con trái <code>2i + 1</code>, con phải <code>2i + 2</code>, cha <code>(i - 1) &gt;&gt; 1</code>.</p>\n",
+       "<p>push: thêm cuối mảng, đổi chỗ với cha khi nhỏ hơn cha.</p>\n",
+       "<p>pop: lưu <code>data[0]</code>, <code>pop()</code> phần tử cuối và đặt vào vị trí 0 (nếu mảng còn phần tử), rồi đổi chỗ với <strong>con nhỏ hơn</strong> khi còn lớn hơn nó.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "code": "const h = new MinHeap(); [5, 1, 8, 3, 2].forEach((x) => h.push(x)); return [h.peek(), h.size];",
+        "label": "push 5,1,8,3,2 → peek, size",
+        "expected": [
+         1,
+         5
+        ]
+       },
+       {
+        "code": "const h = new MinHeap(); [5, 1, 8, 3, 2, 9, 0].forEach((x) => h.push(x)); const out = []; while (h.size) out.push(h.pop()); return out;",
+        "label": "pop hết ra theo thứ tự tăng dần",
+        "expected": [
+         0,
+         1,
+         2,
+         3,
+         5,
+         8,
+         9
+        ]
+       },
+       {
+        "code": "const h = new MinHeap(); return [h.pop(), h.peek(), h.size];",
+        "label": "heap rỗng",
+        "expected": [
+         undefined,
+         undefined,
+         0
+        ]
+       },
+       {
+        "code": "const h = new MinHeap(); h.push(4); h.push(4); h.push(1); return [h.pop(), h.pop(), h.pop(), h.pop()];",
+        "label": "giá trị trùng",
+        "expected": [
+         1,
+         4,
+         4,
+         undefined
+        ]
+       },
+       {
+        "hidden": true,
+        "code": "const h = new MinHeap(); let x = 7; for (let i = 0; i < 100000; i++) { x = (x * 48271) % 2147483647; h.push(x); } let prev = -1; for (let i = 0; i < 100000; i++) { const v = h.pop(); if (v < prev) return \"sai thứ tự ở lần pop \" + i; prev = v; } return h.size;",
+        "label": "100.000 push + 100.000 pop",
+        "expected": 0
+       }
+      ]
+     },
+     {
+      "id": "kth-largest",
+      "title": "Phần tử lớn thứ K",
+      "difficulty": "medium",
+      "prompt": "<p>Trả về phần tử lớn thứ <code>k</code> (theo thứ tự đã sắp xếp, không phải thứ k khác nhau). Class <code>MinHeap</code> đã có sẵn. (LeetCode 215)</p>\n<p><code>findKthLargest([3,2,1,5,6,4], 2)</code> → <code>5</code></p>\n<p>Hãy làm O(n log k) bằng heap kích thước k thay vì sort.</p>\n",
+      "fn": "findKthLargest",
+      "starter": "function findKthLargest(nums, k) {\n\n}\n",
+      "solution": "function findKthLargest(nums, k) {\n  const heap = new MinHeap();\n  for (const x of nums) {\n    heap.push(x);\n    if (heap.size > k) heap.pop();\n  }\n  return heap.peek();\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Giữ min-heap chứa k phần tử lớn nhất đã gặp.</p>\n",
+       "<p>Push từng phần tử; khi <code>heap.size &gt; k</code> thì <code>pop()</code> (bỏ phần tử nhỏ nhất). Đáp án là <code>heap.peek()</code>.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "// MinHeap có sẵn: new MinHeap(compare?) · push(x) · pop() · peek() · size\nclass MinHeap {\n  constructor(compare = (a, b) => a - b) { this.data = []; this.compare = compare; }\n  get size() { return this.data.length; }\n  peek() { return this.data[0]; }\n  push(x) {\n    const d = this.data; d.push(x);\n    for (let i = d.length - 1; i > 0;) {\n      const p = (i - 1) >> 1;\n      if (this.compare(d[i], d[p]) >= 0) break;\n      [d[i], d[p]] = [d[p], d[i]]; i = p;\n    }\n  }\n  pop() {\n    const d = this.data; if (!d.length) return undefined;\n    const top = d[0], last = d.pop();\n    if (d.length) {\n      d[0] = last;\n      for (let i = 0; ;) {\n        const l = 2 * i + 1, r = l + 1; let m = i;\n        if (l < d.length && this.compare(d[l], d[m]) < 0) m = l;\n        if (r < d.length && this.compare(d[r], d[m]) < 0) m = r;\n        if (m === i) break;\n        [d[i], d[m]] = [d[m], d[i]]; i = m;\n      }\n    }\n    return top;\n  }\n}",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          3,
+          2,
+          1,
+          5,
+          6,
+          4
+         ],
+         2
+        ],
+        "expected": 5
+       },
+       {
+        "args": [
+         [
+          3,
+          2,
+          3,
+          1,
+          2,
+          4,
+          5,
+          5,
+          6
+         ],
+         4
+        ],
+        "expected": 4
+       },
+       {
+        "args": [
+         [
+          1
+         ],
+         1
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         [
+          -1,
+          -1
+         ],
+         2
+        ],
+        "expected": -1
+       },
+       {
+        "gen": "return [Array.from({ length: 200000 }, (_, i) => (i * 7919) % 200003), 10];",
+        "label": "n = 200.000, k = 10",
+        "expected": 199993
+       }
+      ]
+     },
+     {
+      "id": "merge-k-sorted",
+      "title": "Gộp K mảng đã sắp xếp",
+      "difficulty": "hard",
+      "prompt": "<p>Cho <code>k</code> mảng, mỗi mảng đã sắp xếp tăng dần. Gộp thành một mảng sắp xếp tăng dần. Tổng số phần tử N lên tới 200.000, k lên tới 2.000.</p>\n<p>Yêu cầu O(N log k). (Phiên bản mảng của LeetCode 23)</p>\n",
+      "fn": "mergeKSorted",
+      "starter": "function mergeKSorted(arrays) {\n\n}\n",
+      "solution": "function mergeKSorted(arrays) {\n  const heap = new MinHeap((a, b) => a[0] - b[0]);\n  arrays.forEach((arr, i) => {\n    if (arr.length) heap.push([arr[0], i, 0]);\n  });\n  const result = [];\n  while (heap.size) {\n    const [value, i, j] = heap.pop();\n    result.push(value);\n    if (j + 1 < arrays[i].length) heap.push([arrays[i][j + 1], i, j + 1]);\n  }\n  return result;\n}\n",
+      "explain": "<p>Mỗi phần tử vào/ra heap một lần, heap có ≤ k phần tử → O(N log k). Cách nối hết rồi sort là O(N log N) — chạy được nhưng không tận dụng việc các mảng đã sắp xếp. Cách gộp lần lượt từng mảng là O(N·k).</p>\n",
+      "hints": [
+       "<p>Heap luôn chứa <strong>phần tử hiện tại</strong> (nhỏ nhất chưa lấy) của mỗi mảng: tối đa k phần tử.</p>\n",
+       "<p>Lưu bộ ba <code>[giá trị, chỉ số mảng, chỉ số trong mảng]</code> và dùng comparator theo giá trị. Pop xong thì push phần tử kế tiếp của cùng mảng đó.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "// MinHeap có sẵn: new MinHeap(compare?) · push(x) · pop() · peek() · size\nclass MinHeap {\n  constructor(compare = (a, b) => a - b) { this.data = []; this.compare = compare; }\n  get size() { return this.data.length; }\n  peek() { return this.data[0]; }\n  push(x) {\n    const d = this.data; d.push(x);\n    for (let i = d.length - 1; i > 0;) {\n      const p = (i - 1) >> 1;\n      if (this.compare(d[i], d[p]) >= 0) break;\n      [d[i], d[p]] = [d[p], d[i]]; i = p;\n    }\n  }\n  pop() {\n    const d = this.data; if (!d.length) return undefined;\n    const top = d[0], last = d.pop();\n    if (d.length) {\n      d[0] = last;\n      for (let i = 0; ;) {\n        const l = 2 * i + 1, r = l + 1; let m = i;\n        if (l < d.length && this.compare(d[l], d[m]) < 0) m = l;\n        if (r < d.length && this.compare(d[r], d[m]) < 0) m = r;\n        if (m === i) break;\n        [d[i], d[m]] = [d[m], d[i]]; i = m;\n      }\n    }\n    return top;\n  }\n}",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          [
+           1,
+           4,
+           5
+          ],
+          [
+           1,
+           3,
+           4
+          ],
+          [
+           2,
+           6
+          ]
+         ]
+        ],
+        "expected": [
+         1,
+         1,
+         2,
+         3,
+         4,
+         4,
+         5,
+         6
+        ]
+       },
+       {
+        "args": [
+         []
+        ],
+        "expected": []
+       },
+       {
+        "args": [
+         [
+          [],
+          [],
+          [
+           7
+          ]
+         ]
+        ],
+        "expected": [
+         7
+        ]
+       },
+       {
+        "args": [
+         [
+          [
+           -3,
+           10
+          ],
+          [
+           -5,
+           0,
+           0,
+           20
+          ]
+         ]
+        ],
+        "expected": [
+         -5,
+         -3,
+         0,
+         0,
+         10,
+         20
+        ]
+       },
+       {
+        "gen": "return [Array.from({ length: 2000 }, (_, i) => Array.from({ length: 100 }, (_, j) => j * 2000 + i))];",
+        "check": "if (result.length !== 200000) return false; for (let i = 0; i < result.length; i++) if (result[i] !== i) return false; return true;",
+        "label": "k = 2.000 mảng × 100 phần tử",
+        "expectedText": "[0, 1, 2, ..., 199999]"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dsa-graphs",
+    "title": "Đồ thị (Graph): BFS, DFS, sắp xếp topo",
+    "html": "<p>Đồ thị gồm <strong>đỉnh</strong> (node) và <strong>cạnh</strong> (edge) nối chúng. Mạng xã hội, bản đồ, phụ thuộc giữa các module, lưới ô vuông trong game — đều là đồ thị.</p>\n<h2>Biểu diễn: danh sách kề (adjacency list)</h2>\n<pre class=\"code\" data-run><code class=\"language-js\">// Cạnh vô hướng: [[0,1],[0,2],[1,3]]\nfunction buildGraph(n, edges) {\n  const adj = Array.from({ length: n }, () =&gt; []);\n  for (const [u, v] of edges) {\n    adj[u].push(v);\n    adj[v].push(u);        // bỏ dòng này nếu đồ thị CÓ HƯỚNG\n  }\n  return adj;\n}\nconsole.log(buildGraph(4, [[0, 1], [0, 2], [1, 3]])); // [[1,2],[0,3],[0],[1]]</code></pre>\n<p>Danh sách kề tốn O(V + E) bộ nhớ. (Ma trận kề V×V chỉ hợp khi đồ thị dày.)</p>\n<h2>BFS — lan theo từng lớp, tìm đường ngắn nhất</h2>\n<p>Trên đồ thị <strong>không trọng số</strong>, BFS từ nguồn cho ra <strong>khoảng cách ngắn nhất</strong> (số cạnh) tới mọi đỉnh.</p>\n<pre class=\"code\" data-run><code class=\"language-js\">function bfsDistances(adj, start) {\n  const dist = new Array(adj.length).fill(-1);\n  dist[start] = 0;\n  const queue = [start];\n  for (let head = 0; head &lt; queue.length; head++) {\n    const u = queue[head];\n    for (const v of adj[u]) {\n      if (dist[v] === -1) {          // chưa thăm\n        dist[v] = dist[u] + 1;\n        queue.push(v);\n      }\n    }\n  }\n  return dist;\n}\nconst adj = [[1, 2], [0, 3], [0, 3], [1, 2, 4], [3]];\nconsole.log(bfsDistances(adj, 0)); // [0, 1, 1, 2, 3]</code></pre>\n<blockquote><p>Đánh dấu &quot;đã thăm&quot; <strong>khi đưa vào queue</strong>, không phải khi lấy ra — nếu không, một đỉnh có thể bị đưa vào queue nhiều lần.</p>\n</blockquote>\n<h2>DFS — đi sâu hết mức rồi quay lui</h2>\n<p>Dùng để: duyệt mọi đỉnh liên thông, đếm thành phần liên thông, phát hiện chu trình, sắp xếp topo.</p>\n<pre class=\"code\" data-run><code class=\"language-js\">function countComponents(n, adj) {\n  const seen = new Array(n).fill(false);\n  function dfs(u) {\n    seen[u] = true;\n    for (const v of adj[u]) if (!seen[v]) dfs(v);\n  }\n  let count = 0;\n  for (let u = 0; u &lt; n; u++) {\n    if (!seen[u]) {\n      count++;\n      dfs(u);\n    }\n  }\n  return count;\n}\nconsole.log(countComponents(5, [[1], [0], [3], [2], []])); // 3: {0,1} {2,3} {4}</code></pre>\n<h2>Lưới (grid) là đồ thị ngầm</h2>\n<p>Mỗi ô là một đỉnh, nối với 4 ô kề. Không cần xây danh sách kề — duyệt hàng xóm bằng mảng hướng:</p>\n<pre class=\"code\"><code class=\"language-js\">const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];\nfor (const [dr, dc] of DIRS) {\n  const nr = r + dr, nc = c + dc;\n  if (nr &lt; 0 || nr &gt;= rows || nc &lt; 0 || nc &gt;= cols) continue; // ra ngoài lưới\n  // ...\n}</code></pre>\n<h2>Sắp xếp topo (topological sort) — thứ tự phụ thuộc</h2>\n<p>Với đồ thị <strong>có hướng không chu trình</strong> (DAG): sắp các đỉnh sao cho mọi cạnh <code>u → v</code> thì <code>u</code> đứng trước <code>v</code>. Ví dụ: thứ tự học môn (môn tiên quyết), thứ tự build module.</p>\n<p><strong>Thuật toán Kahn:</strong> lần lượt lấy các đỉnh có <strong>bậc vào = 0</strong> (không còn phụ thuộc), &quot;xoá&quot; chúng và giảm bậc vào của hàng xóm. Nếu cuối cùng không lấy được hết đỉnh → đồ thị <strong>có chu trình</strong>.</p>\n<pre class=\"code\" data-run><code class=\"language-js\">function topoSort(n, edges) {\n  const adj = Array.from({ length: n }, () =&gt; []);\n  const indegree = new Array(n).fill(0);\n  for (const [u, v] of edges) {\n    adj[u].push(v);\n    indegree[v]++;\n  }\n  const order = [];\n  for (let u = 0; u &lt; n; u++) if (indegree[u] === 0) order.push(u);\n  for (let head = 0; head &lt; order.length; head++) {\n    for (const v of adj[order[head]]) {\n      if (--indegree[v] === 0) order.push(v);\n    }\n  }\n  return order.length === n ? order : null; // null = có chu trình\n}\nconsole.log(topoSort(4, [[0, 1], [0, 2], [1, 3], [2, 3]])); // [0, 1, 2, 3]\nconsole.log(topoSort(2, [[0, 1], [1, 0]]));                 // null</code></pre>\n<h2>Độ phức tạp</h2>\n<p>BFS, DFS, Kahn đều <strong>O(V + E)</strong>: mỗi đỉnh thăm một lần, mỗi cạnh xét một (hoặc hai) lần.</p>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Tại sao BFS cho đường đi ngắn nhất còn DFS thì không? Nếu cạnh có <strong>trọng số</strong> khác nhau thì BFS còn đúng không? (Tìm hiểu: Dijkstra = BFS + heap.)</li><li>DFS đệ quy trên lưới 1000×1000 có thể tràn stack. Bạn sẽ đổi sang gì?</li><li>Union-Find (Disjoint Set) cũng đếm được thành phần liên thông. Khi nào nó tốt hơn DFS? (Gợi ý: cạnh được thêm dần theo thời gian.)</li></ul>\n",
+    "source": "content/03-dsa/12-graphs.md",
+    "exercises": [
+     {
+      "id": "number-of-islands",
+      "title": "Đếm số đảo",
+      "difficulty": "medium",
+      "prompt": "<p>Lưới <code>grid</code> gồm <code>&quot;1&quot;</code> (đất) và <code>&quot;0&quot;</code> (nước). Một <strong>đảo</strong> là nhóm ô đất nối nhau theo 4 hướng (trên/dưới/trái/phải). Đếm số đảo. (LeetCode 200)</p>\n<p>Test ẩn có lưới 300×300 toàn đất xoắn ốc — DFS đệ quy có thể tràn stack, cân nhắc BFS hoặc stack tự quản lý.</p>\n",
+      "fn": "numIslands",
+      "starter": "function numIslands(grid) {\n\n}\n",
+      "solution": "function numIslands(grid) {\n  const rows = grid.length;\n  if (rows === 0) return 0;\n  const cols = grid[0].length;\n  const seen = Array.from({ length: rows }, () => new Array(cols).fill(false));\n  const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];\n  let count = 0;\n  for (let r = 0; r < rows; r++) {\n    for (let c = 0; c < cols; c++) {\n      if (grid[r][c] !== \"1\" || seen[r][c]) continue;\n      count++;\n      seen[r][c] = true;\n      const stack = [[r, c]];\n      while (stack.length) {\n        const [cr, cc] = stack.pop();\n        for (const [dr, dc] of DIRS) {\n          const nr = cr + dr;\n          const nc = cc + dc;\n          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;\n          if (grid[nr][nc] !== \"1\" || seen[nr][nc]) continue;\n          seen[nr][nc] = true;\n          stack.push([nr, nc]);\n        }\n      }\n    }\n  }\n  return count;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Duyệt mọi ô. Gặp ô đất chưa thăm → tăng bộ đếm, rồi &quot;loang&quot; (DFS/BFS) đánh dấu toàn bộ đảo đó là đã thăm.</p>\n",
+       "<p>Dùng stack tự quản lý thay cho đệ quy để tránh tràn stack với đảo lớn.</p>\n",
+       "<p>Có thể đánh dấu bằng cách sửa <code>grid[r][c] = &quot;0&quot;</code> — nhanh nhưng làm hỏng input; hỏi người phỏng vấn trước.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          [
+           "1",
+           "1",
+           "1",
+           "1",
+           "0"
+          ],
+          [
+           "1",
+           "1",
+           "0",
+           "1",
+           "0"
+          ],
+          [
+           "1",
+           "1",
+           "0",
+           "0",
+           "0"
+          ],
+          [
+           "0",
+           "0",
+           "0",
+           "0",
+           "0"
+          ]
+         ]
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         [
+          [
+           "1",
+           "1",
+           "0",
+           "0",
+           "0"
+          ],
+          [
+           "1",
+           "1",
+           "0",
+           "0",
+           "0"
+          ],
+          [
+           "0",
+           "0",
+           "1",
+           "0",
+           "0"
+          ],
+          [
+           "0",
+           "0",
+           "0",
+           "1",
+           "1"
+          ]
+         ]
+        ],
+        "expected": 3
+       },
+       {
+        "args": [
+         [
+          [
+           "0"
+          ]
+         ]
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         [
+          [
+           "1",
+           "0",
+           "1",
+           "0",
+           "1"
+          ]
+         ]
+        ],
+        "expected": 3
+       },
+       {
+        "gen": "const n = 300; const g = Array.from({ length: n }, () => new Array(n).fill(\"1\")); return [g];",
+        "label": "lưới 300×300 toàn đất (một đảo khổng lồ)",
+        "expected": 1
+       }
+      ]
+     },
+     {
+      "id": "shortest-path-grid",
+      "title": "Đường ngắn nhất trong mê cung",
+      "difficulty": "medium",
+      "prompt": "<p>Mê cung là mảng chuỗi: <code>&quot;.&quot;</code> là đường đi, <code>&quot;#&quot;</code> là tường, <code>&quot;S&quot;</code> là điểm xuất phát, <code>&quot;E&quot;</code> là đích. Mỗi bước đi sang ô kề theo 4 hướng. Trả về <strong>số bước ít nhất</strong> từ S tới E, hoặc <code>-1</code> nếu không tới được.</p>\n<pre class=\"code\"><code class=\"language-text\">S.#\n.##\n..E   → 4</code></pre>\n",
+      "fn": "shortestPath",
+      "starter": "function shortestPath(maze) {\n\n}\n",
+      "solution": "function shortestPath(maze) {\n  const rows = maze.length;\n  const cols = maze[0].length;\n  let start = null;\n  for (let r = 0; r < rows; r++) {\n    const c = maze[r].indexOf(\"S\");\n    if (c !== -1) start = [r, c];\n  }\n  const dist = Array.from({ length: rows }, () => new Array(cols).fill(-1));\n  dist[start[0]][start[1]] = 0;\n  const queue = [start];\n  const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];\n  for (let head = 0; head < queue.length; head++) {\n    const [r, c] = queue[head];\n    if (maze[r][c] === \"E\") return dist[r][c];\n    for (const [dr, dc] of DIRS) {\n      const nr = r + dr;\n      const nc = c + dc;\n      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;\n      if (maze[nr][nc] === \"#\" || dist[nr][nc] !== -1) continue;\n      dist[nr][nc] = dist[r][c] + 1;\n      queue.push([nr, nc]);\n    }\n  }\n  return -1;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Đường ngắn nhất trên lưới không trọng số → <strong>BFS</strong>, không phải DFS.</p>\n",
+       "<p>Lưu <code>dist[r][c]</code> (khởi tạo -1 = chưa thăm). Khi lấy ra ô &quot;E&quot; thì trả về khoảng cách của nó.</p>\n",
+       "<p>Dùng con trỏ <code>head</code> thay cho <code>shift()</code>.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          "S.#",
+          ".##",
+          "..E"
+         ]
+        ],
+        "expected": 4
+       },
+       {
+        "args": [
+         [
+          "S#E"
+         ]
+        ],
+        "expected": -1
+       },
+       {
+        "args": [
+         [
+          "SE"
+         ]
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         [
+          "S....",
+          "####.",
+          "E...."
+         ]
+        ],
+        "expected": 10
+       },
+       {
+        "gen": "const n = 400; const rows = []; for (let r = 0; r < n; r++) rows.push(\".\".repeat(n)); rows[0] = \"S\" + rows[0].slice(1); rows[n - 1] = rows[n - 1].slice(0, n - 1) + \"E\"; return [rows];",
+        "label": "lưới trống 400×400, S ở góc trên trái, E ở góc dưới phải",
+        "expected": 798
+       }
+      ]
+     },
+     {
+      "id": "course-schedule",
+      "title": "Course Schedule (phát hiện chu trình)",
+      "difficulty": "medium",
+      "prompt": "<p>Có <code>n</code> môn học đánh số <code>0..n-1</code>. <code>prerequisites[i] = [a, b]</code> nghĩa là phải học <code>b</code> <strong>trước</strong> <code>a</code>. Có thể học hết các môn không? (LeetCode 207)</p>\n",
+      "fn": "canFinish",
+      "starter": "function canFinish(n, prerequisites) {\n\n}\n",
+      "solution": "function canFinish(n, prerequisites) {\n  const adj = Array.from({ length: n }, () => []);\n  const indegree = new Array(n).fill(0);\n  for (const [a, b] of prerequisites) {\n    adj[b].push(a);\n    indegree[a]++;\n  }\n  const queue = [];\n  for (let i = 0; i < n; i++) if (indegree[i] === 0) queue.push(i);\n  for (let head = 0; head < queue.length; head++) {\n    for (const next of adj[queue[head]]) {\n      if (--indegree[next] === 0) queue.push(next);\n    }\n  }\n  return queue.length === n;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Đây là câu hỏi &quot;đồ thị có hướng này có <strong>chu trình</strong> không?&quot;. Cạnh <code>b → a</code>.</p>\n",
+       "<p>Sắp xếp topo (Kahn): nếu lấy ra được đủ n đỉnh thì không có chu trình.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         2,
+         [
+          [
+           1,
+           0
+          ]
+         ]
+        ],
+        "expected": true
+       },
+       {
+        "args": [
+         2,
+         [
+          [
+           1,
+           0
+          ],
+          [
+           0,
+           1
+          ]
+         ]
+        ],
+        "expected": false
+       },
+       {
+        "args": [
+         3,
+         []
+        ],
+        "expected": true
+       },
+       {
+        "args": [
+         4,
+         [
+          [
+           1,
+           0
+          ],
+          [
+           2,
+           1
+          ],
+          [
+           3,
+           2
+          ],
+          [
+           1,
+           3
+          ]
+         ]
+        ],
+        "expected": false
+       },
+       {
+        "args": [
+         5,
+         [
+          [
+           1,
+           0
+          ],
+          [
+           2,
+           0
+          ],
+          [
+           3,
+           1
+          ],
+          [
+           3,
+           2
+          ],
+          [
+           4,
+           3
+          ]
+         ]
+        ],
+        "expected": true
+       },
+       {
+        "gen": "const n = 100000; const e = []; for (let i = 1; i < n; i++) e.push([i, i - 1]); return [n, e];",
+        "label": "chuỗi 100.000 môn nối tiếp",
+        "expected": true
+       }
+      ]
+     },
+     {
+      "id": "count-components",
+      "title": "Đếm thành phần liên thông",
+      "difficulty": "medium",
+      "prompt": "<p>Đồ thị <strong>vô hướng</strong> <code>n</code> đỉnh với danh sách cạnh <code>edges</code>. Đếm số thành phần liên thông.</p>\n<p>Thử giải bằng <strong>Union-Find</strong> (Disjoint Set Union): mỗi đỉnh có &quot;đại diện&quot;; nối cạnh = hợp hai nhóm.</p>\n",
+      "fn": "countComponents",
+      "starter": "function countComponents(n, edges) {\n\n}\n",
+      "solution": "function countComponents(n, edges) {\n  const parent = Array.from({ length: n }, (_, i) => i);\n  const rank = new Array(n).fill(0);\n  function find(x) {\n    while (parent[x] !== x) {\n      parent[x] = parent[parent[x]];\n      x = parent[x];\n    }\n    return x;\n  }\n  let components = n;\n  for (const [a, b] of edges) {\n    let ra = find(a);\n    let rb = find(b);\n    if (ra === rb) continue;\n    if (rank[ra] < rank[rb]) [ra, rb] = [rb, ra];\n    parent[rb] = ra;\n    if (rank[ra] === rank[rb]) rank[ra]++;\n    components--;\n  }\n  return components;\n}\n",
+      "explain": "<p>Với hai tối ưu, mỗi thao tác gần như O(1) (chính xác là O(α(n)) — hàm Ackermann ngược, ≤ 4 với mọi n thực tế). Union-Find mạnh khi cạnh được thêm <strong>dần dần</strong> và cần trả lời &quot;a và b đã nối chưa?&quot; liên tục (VD Kruskal, bài &quot;Redundant Connection&quot;).</p>\n",
+      "hints": [
+       "<p><code>parent[i] = i</code> ban đầu: mỗi đỉnh là một nhóm. <code>find(x)</code> đi theo <code>parent</code> tới gốc.</p>\n",
+       "<p>Với mỗi cạnh (a, b): nếu <code>find(a) !== find(b)</code> thì nối gốc này vào gốc kia và giảm số thành phần.</p>\n",
+       "<p>Tối ưu: nén đường đi (path compression) trong <code>find</code>, và nối cây thấp vào cây cao (union by rank).</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         5,
+         [
+          [
+           0,
+           1
+          ],
+          [
+           1,
+           2
+          ],
+          [
+           3,
+           4
+          ]
+         ]
+        ],
+        "expected": 2
+       },
+       {
+        "args": [
+         5,
+         [
+          [
+           0,
+           1
+          ],
+          [
+           1,
+           2
+          ],
+          [
+           2,
+           3
+          ],
+          [
+           3,
+           4
+          ]
+         ]
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         3,
+         []
+        ],
+        "expected": 3
+       },
+       {
+        "args": [
+         4,
+         [
+          [
+           0,
+           1
+          ],
+          [
+           1,
+           0
+          ],
+          [
+           2,
+           3
+          ],
+          [
+           3,
+           2
+          ]
+         ]
+        ],
+        "expected": 2
+       },
+       {
+        "gen": "const n = 200000; const e = []; for (let i = 0; i + 2 < n; i += 2) e.push([i, i + 2]); return [n, e];",
+        "label": "n = 200.000 (chẵn nối chẵn, lẻ đứng riêng)",
+        "expected": 100001
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dsa-backtracking",
+    "title": "Quay lui (Backtracking)",
+    "html": "<p>Backtracking = <strong>thử mọi lựa chọn</strong> một cách có hệ thống: chọn → đi tiếp (đệ quy) → <strong>bỏ chọn</strong> (quay lui) → thử lựa chọn khác. Dùng cho bài &quot;liệt kê <strong>tất cả</strong>&quot;: tập con, hoán vị, tổ hợp, đặt quân hậu, giải sudoku.</p>\n<h2>Khuôn mẫu</h2>\n<pre class=\"code\"><code class=\"language-js\">function backtrack(state) {\n  if (/* state là một lời giải hoàn chỉnh */) {\n    result.push([...state]);            // LƯU BẢN SAO, không phải tham chiếu!\n    return;\n  }\n  for (const choice of /* các lựa chọn hợp lệ */) {\n    state.push(choice);                 // 1. chọn\n    backtrack(state);                   // 2. đi tiếp\n    state.pop();                        // 3. bỏ chọn\n  }\n}</code></pre>\n<h2>Ví dụ: mọi tập con</h2>\n<pre class=\"code\" data-run><code class=\"language-js\">function subsets(nums) {\n  const result = [];\n  const path = [];\n  function backtrack(start) {\n    result.push([...path]);              // mọi trạng thái đều là một tập con\n    for (let i = start; i &lt; nums.length; i++) {\n      path.push(nums[i]);\n      backtrack(i + 1);                  // chỉ chọn các phần tử SAU i → không trùng tổ hợp\n      path.pop();\n    }\n  }\n  backtrack(0);\n  return result;\n}\nconsole.log(JSON.stringify(subsets([1, 2, 3])));\n// [[],[1],[1,2],[1,2,3],[1,3],[2],[2,3],[3]]</code></pre>\n<h2>Cây quyết định và độ phức tạp</h2>\n<p>Hình dung cây: mỗi tầng là một quyết định, mỗi nhánh là một lựa chọn.</p>\n<table><thead><tr><th>Bài</th><th>Số lời giải</th><th>Độ phức tạp</th></tr></thead>\n<tbody>\n<tr><td>Tập con của n phần tử</td><td>2^n</td><td>O(n · 2^n)</td></tr>\n<tr><td>Hoán vị n phần tử</td><td>n!</td><td>O(n · n!)</td></tr>\n<tr><td>Tổ hợp chập k</td><td>C(n, k)</td><td>O(k · C(n, k))</td></tr>\n</tbody></table>\n<p>Vì vậy đề backtracking luôn có <strong>n nhỏ</strong> (≤ 10–20). Thấy n ≤ 15 là một gợi ý mạnh.</p>\n<h2>Cắt tỉa (pruning)</h2>\n<p>Sức mạnh thật của backtracking là <strong>dừng sớm</strong> những nhánh chắc chắn không dẫn tới lời giải:</p>\n<ul><li>Tổng đã vượt target → không đi tiếp (bài Combination Sum, nhất là khi đã sort).</li><li>Quân hậu bị tấn công → không đặt.</li><li>Ô sudoku vi phạm luật → thử số khác ngay.</li></ul>\n<h2>Xử lý phần tử trùng</h2>\n<p>Nếu input có phần tử trùng mà đề không muốn kết quả trùng: <strong>sort trước</strong>, rồi trong cùng một tầng bỏ qua <code>nums[i] === nums[i - 1]</code> (với <code>i &gt; start</code>).</p>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Tại sao phải <code>result.push([...path])</code> chứ không <code>result.push(path)</code>? Chạy thử bản sai trong Playground để thấy kết quả.</li><li>Backtracking và DFS khác nhau thế nào? (Gợi ý: backtracking là DFS trên <strong>cây trạng thái</strong> — cây này không được lưu sẵn mà sinh ra trong lúc chạy.)</li><li>Khi nào backtracking nên được thay bằng quy hoạch động? (Gợi ý: đề hỏi <strong>đếm số cách</strong> / <strong>giá trị tốt nhất</strong> thay vì <strong>liệt kê</strong> mọi cách.)</li></ul>\n",
+    "source": "content/03-dsa/13-backtracking.md",
+    "exercises": [
+     {
+      "id": "subsets",
+      "title": "Subsets",
+      "difficulty": "medium",
+      "prompt": "<p>Trả về <strong>mọi tập con</strong> của mảng <code>nums</code> (các phần tử khác nhau). Thứ tự không quan trọng. (LeetCode 78)</p>\n",
+      "fn": "subsets",
+      "starter": "function subsets(nums) {\n\n}\n",
+      "solution": "function subsets(nums) {\n  const result = [];\n  const path = [];\n  function backtrack(start) {\n    result.push([...path]);\n    for (let i = start; i < nums.length; i++) {\n      path.push(nums[i]);\n      backtrack(i + 1);\n      path.pop();\n    }\n  }\n  backtrack(0);\n  return result;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Khuôn mẫu trong bài học: mỗi lần vào hàm đệ quy là một tập con → lưu bản sao <code>[...path]</code>.</p>\n",
+       "<p>Cách khác không đệ quy: bắt đầu với <code>[[]]</code>, với mỗi số x, thêm x vào <strong>mọi</strong> tập con đã có để tạo tập con mới.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": "unordered-deep",
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          1,
+          2,
+          3
+         ]
+        ],
+        "expected": [
+         [],
+         [
+          1
+         ],
+         [
+          2
+         ],
+         [
+          1,
+          2
+         ],
+         [
+          3
+         ],
+         [
+          1,
+          3
+         ],
+         [
+          2,
+          3
+         ],
+         [
+          1,
+          2,
+          3
+         ]
+        ]
+       },
+       {
+        "args": [
+         [
+          0
+         ]
+        ],
+        "expected": [
+         [],
+         [
+          0
+         ]
+        ]
+       },
+       {
+        "args": [
+         []
+        ],
+        "expected": [
+         []
+        ]
+       },
+       {
+        "gen": "return [Array.from({ length: 16 }, (_, i) => i)];",
+        "check": "return result.length === 65536 && new Set(result.map((s) => [...s].sort((a, b) => a - b).join(\",\"))).size === 65536;",
+        "label": "n = 16 → 65.536 tập con",
+        "expectedText": "65.536 tập con khác nhau"
+       }
+      ]
+     },
+     {
+      "id": "permutations",
+      "title": "Permutations",
+      "difficulty": "medium",
+      "prompt": "<p>Trả về <strong>mọi hoán vị</strong> của mảng <code>nums</code> (các phần tử khác nhau). Thứ tự các hoán vị không quan trọng. (LeetCode 46)</p>\n",
+      "fn": "permute",
+      "starter": "function permute(nums) {\n\n}\n",
+      "solution": "function permute(nums) {\n  const result = [];\n  const path = [];\n  const used = new Array(nums.length).fill(false);\n  function backtrack() {\n    if (path.length === nums.length) {\n      result.push([...path]);\n      return;\n    }\n    for (let i = 0; i < nums.length; i++) {\n      if (used[i]) continue;\n      used[i] = true;\n      path.push(nums[i]);\n      backtrack();\n      path.pop();\n      used[i] = false;\n    }\n  }\n  backtrack();\n  return result;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Khác với tập con: mỗi tầng được chọn <strong>bất kỳ</strong> phần tử nào <strong>chưa dùng</strong> (không chỉ các phần tử sau i).</p>\n",
+       "<p>Mảng <code>used[i]</code> đánh dấu phần tử đã nằm trong <code>path</code>. Nhớ bỏ đánh dấu khi quay lui.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": "unordered",
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          1,
+          2,
+          3
+         ]
+        ],
+        "expected": [
+         [
+          1,
+          2,
+          3
+         ],
+         [
+          1,
+          3,
+          2
+         ],
+         [
+          2,
+          1,
+          3
+         ],
+         [
+          2,
+          3,
+          1
+         ],
+         [
+          3,
+          1,
+          2
+         ],
+         [
+          3,
+          2,
+          1
+         ]
+        ]
+       },
+       {
+        "args": [
+         [
+          0,
+          1
+         ]
+        ],
+        "expected": [
+         [
+          0,
+          1
+         ],
+         [
+          1,
+          0
+         ]
+        ]
+       },
+       {
+        "args": [
+         [
+          1
+         ]
+        ],
+        "expected": [
+         [
+          1
+         ]
+        ]
+       },
+       {
+        "gen": "return [[1, 2, 3, 4, 5, 6, 7, 8]];",
+        "check": "return result.length === 40320 && new Set(result.map((p) => p.join(\"\"))).size === 40320 && result.every((p) => p.length === 8);",
+        "label": "n = 8 → 40.320 hoán vị",
+        "expectedText": "40.320 hoán vị khác nhau"
+       }
+      ]
+     },
+     {
+      "id": "combination-sum",
+      "title": "Combination Sum",
+      "difficulty": "medium",
+      "prompt": "<p><code>candidates</code> là các số nguyên dương <strong>khác nhau</strong>. Tìm mọi tổ hợp có tổng bằng <code>target</code>; mỗi số được dùng <strong>nhiều lần</strong>. Hai tổ hợp chỉ khác thứ tự coi là một. (LeetCode 39)</p>\n<p><code>combinationSum([2,3,6,7], 7)</code> → <code>[[2,2,3],[7]]</code></p>\n",
+      "fn": "combinationSum",
+      "starter": "function combinationSum(candidates, target) {\n\n}\n",
+      "solution": "function combinationSum(candidates, target) {\n  const nums = [...candidates].sort((a, b) => a - b);\n  const result = [];\n  const path = [];\n  function backtrack(start, remaining) {\n    if (remaining === 0) {\n      result.push([...path]);\n      return;\n    }\n    for (let i = start; i < nums.length; i++) {\n      if (nums[i] > remaining) break;\n      path.push(nums[i]);\n      backtrack(i, remaining - nums[i]);\n      path.pop();\n    }\n  }\n  backtrack(0, target);\n  return result;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Để tránh <code>[2,3,2]</code> và <code>[2,2,3]</code> cùng xuất hiện: chỉ chọn các số từ vị trí <code>start</code> trở đi.</p>\n",
+       "<p>Được dùng lại số hiện tại → gọi đệ quy với <code>start = i</code> (không phải <code>i + 1</code>).</p>\n",
+       "<p>Cắt tỉa: sort trước, nếu <code>nums[i] &gt; remaining</code> thì <code>break</code>.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": "unordered-deep",
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          2,
+          3,
+          6,
+          7
+         ],
+         7
+        ],
+        "expected": [
+         [
+          2,
+          2,
+          3
+         ],
+         [
+          7
+         ]
+        ]
+       },
+       {
+        "args": [
+         [
+          2,
+          3,
+          5
+         ],
+         8
+        ],
+        "expected": [
+         [
+          2,
+          2,
+          2,
+          2
+         ],
+         [
+          2,
+          3,
+          3
+         ],
+         [
+          3,
+          5
+         ]
+        ]
+       },
+       {
+        "args": [
+         [
+          2
+         ],
+         1
+        ],
+        "expected": []
+       },
+       {
+        "args": [
+         [
+          7,
+          3,
+          2
+         ],
+         7
+        ],
+        "expected": [
+         [
+          2,
+          2,
+          3
+         ],
+         [
+          7
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "n-queens",
+      "title": "N-Queens (đếm số cách)",
+      "difficulty": "hard",
+      "prompt": "<p>Đếm số cách đặt <code>n</code> quân hậu lên bàn cờ <code>n × n</code> sao cho không quân nào ăn được quân nào (cùng hàng, cùng cột, cùng đường chéo). <code>1 &lt;= n &lt;= 11</code>. (LeetCode 52)</p>\n",
+      "fn": "totalNQueens",
+      "starter": "function totalNQueens(n) {\n\n}\n",
+      "solution": "function totalNQueens(n) {\n  const cols = new Array(n).fill(false);\n  const diag1 = new Array(2 * n).fill(false);\n  const diag2 = new Array(2 * n).fill(false);\n  let count = 0;\n  function place(row) {\n    if (row === n) {\n      count++;\n      return;\n    }\n    for (let c = 0; c < n; c++) {\n      if (cols[c] || diag1[row + c] || diag2[row - c + n]) continue;\n      cols[c] = diag1[row + c] = diag2[row - c + n] = true;\n      place(row + 1);\n      cols[c] = diag1[row + c] = diag2[row - c + n] = false;\n    }\n  }\n  place(0);\n  return count;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Đặt từng hàng một → tự động không có hai quân cùng hàng. Mỗi hàng thử mọi cột.</p>\n",
+       "<p>Các ô trên cùng đường chéo &quot;\\&quot; có <code>row - col</code> bằng nhau; đường chéo &quot;/&quot; có <code>row + col</code> bằng nhau.</p>\n",
+       "<p>Dùng 3 mảng boolean (cột, chéo 1, chéo 2) để kiểm tra O(1) thay vì quét bàn cờ.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         1
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         4
+        ],
+        "expected": 2
+       },
+       {
+        "args": [
+         6
+        ],
+        "expected": 4
+       },
+       {
+        "args": [
+         8
+        ],
+        "expected": 92
+       },
+       {
+        "args": [
+         11
+        ],
+        "expected": 2680,
+        "hidden": true,
+        "label": "n = 11 — cần cắt tỉa O(1) mỗi ô"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dsa-dp",
+    "title": "Quy hoạch động (Dynamic Programming)",
+    "html": "<p>Quy hoạch động (DP) = đệ quy + <strong>không giải lại bài toán con đã giải</strong>. Áp dụng khi bài toán có:</p>\n<ol><li><strong>Bài toán con gối nhau</strong> (overlapping subproblems): cùng một bài toán con xuất hiện nhiều lần.</li><li><strong>Cấu trúc con tối ưu</strong> (optimal substructure): lời giải tối ưu được ghép từ lời giải tối ưu của bài toán con.</li></ol>\n<p>Dấu hiệu trong đề: &quot;<strong>bao nhiêu cách</strong>...&quot;, &quot;giá trị <strong>lớn nhất / nhỏ nhất</strong>...&quot;, &quot;có thể ... <strong>không</strong>&quot;, với lựa chọn ở mỗi bước phụ thuộc vào các bước trước.</p>\n<h2>Từ đệ quy ngây thơ đến DP</h2>\n<p>Bài: leo cầu thang n bậc, mỗi lần bước 1 hoặc 2 bậc. Có bao nhiêu cách?</p>\n<p>Để đứng ở bậc n, bước cuối cùng là từ bậc n−1 hoặc n−2 → <code>ways(n) = ways(n-1) + ways(n-2)</code>.</p>\n<pre class=\"code\" data-run><code class=\"language-js\">// 1. Đệ quy ngây thơ — O(2^n)\nconst naive = (n) =&gt; (n &lt;= 1 ? 1 : naive(n - 1) + naive(n - 2));\n\n// 2. Top-down: đệ quy + memo — O(n)\nfunction memoWays(n, memo = new Map()) {\n  if (n &lt;= 1) return 1;\n  if (memo.has(n)) return memo.get(n);\n  const r = memoWays(n - 1, memo) + memoWays(n - 2, memo);\n  memo.set(n, r);\n  return r;\n}\n\n// 3. Bottom-up: lập bảng từ nhỏ đến lớn — O(n), không đệ quy\nfunction tableWays(n) {\n  const dp = new Array(n + 1).fill(0);\n  dp[0] = dp[1] = 1;\n  for (let i = 2; i &lt;= n; i++) dp[i] = dp[i - 1] + dp[i - 2];\n  return dp[n];\n}\n\n// 4. Tối ưu bộ nhớ: chỉ cần 2 giá trị trước — O(1) bộ nhớ\nfunction rollingWays(n) {\n  let a = 1, b = 1;\n  for (let i = 2; i &lt;= n; i++) [a, b] = [b, a + b];\n  return b;\n}\n\nconsole.log(naive(20), memoWays(20), tableWays(20), rollingWays(20));\nconsole.log(rollingWays(70));</code></pre>\n<h2>Công thức 4 bước để giải mọi bài DP</h2>\n<ol><li><strong>Định nghĩa trạng thái</strong>: <code>dp[i]</code> (hoặc <code>dp[i][j]</code>) nghĩa là gì — viết ra bằng lời, thật chính xác. <em>Đây là bước khó nhất.</em></li><li><strong>Công thức chuyển</strong>: tính <code>dp[i]</code> từ các trạng thái nhỏ hơn như thế nào.</li><li><strong>Base case</strong>: giá trị khởi đầu.</li><li><strong>Thứ tự tính &amp; đáp án</strong>: tính theo thứ tự nào để khi cần thì trạng thái nhỏ hơn đã có; đáp án nằm ở ô nào.</li></ol>\n<h2>Ví dụ: Coin Change</h2>\n<p>Ít đồng xu nhất để tạo thành <code>amount</code> (mỗi loại dùng không giới hạn):</p>\n<ol><li><code>dp[x]</code> = số xu ít nhất để tạo ra tổng x.</li><li><code>dp[x] = min(dp[x - c] + 1)</code> với mọi đồng <code>c &lt;= x</code>.</li><li><code>dp[0] = 0</code>; các ô khác khởi tạo <code>Infinity</code> (chưa tạo được).</li><li>Tính x từ 1 đến amount; đáp án <code>dp[amount]</code> (Infinity → -1).</li></ol>\n<pre class=\"code\" data-run><code class=\"language-js\">function coinChange(coins, amount) {\n  const dp = new Array(amount + 1).fill(Infinity);\n  dp[0] = 0;\n  for (let x = 1; x &lt;= amount; x++) {\n    for (const c of coins) {\n      if (c &lt;= x &amp;&amp; dp[x - c] + 1 &lt; dp[x]) dp[x] = dp[x - c] + 1;\n    }\n  }\n  return dp[amount] === Infinity ? -1 : dp[amount];\n}\nconsole.log(coinChange([1, 2, 5], 11)); // 3 (5 + 5 + 1)\nconsole.log(coinChange([2], 3));        // -1\nconsole.log(coinChange([1, 3, 4], 6));  // 2 (3 + 3) — tham lam chọn 4 + 1 + 1 = 3 xu là SAI</code></pre>\n<h2>DP 2 chiều</h2>\n<p>Khi trạng thái cần hai thông số: hai chuỗi (<code>dp[i][j]</code> cho tiền tố của mỗi chuỗi), lưới (<code>dp[r][c]</code>), hoặc &quot;xét i món đầu với sức chứa w&quot; (knapsack).</p>\n<pre class=\"code\" data-run><code class=\"language-js\">// Số đường đi từ góc trên trái tới góc dưới phải, chỉ đi phải hoặc xuống\nfunction uniquePaths(m, n) {\n  const dp = Array.from({ length: m }, () =&gt; new Array(n).fill(1));\n  for (let r = 1; r &lt; m; r++)\n    for (let c = 1; c &lt; n; c++)\n      dp[r][c] = dp[r - 1][c] + dp[r][c - 1];\n  return dp[m - 1][n - 1];\n}\nconsole.log(uniquePaths(3, 7)); // 28</code></pre>\n<h2>Các dạng DP kinh điển</h2>\n<table><thead><tr><th>Dạng</th><th>Ví dụ</th><th>Trạng thái</th></tr></thead>\n<tbody>\n<tr><td>Dãy 1 chiều</td><td>Climbing Stairs, House Robber</td><td><code>dp[i]</code> = đáp án cho i phần tử đầu</td></tr>\n<tr><td>Không giới hạn số lần chọn</td><td>Coin Change</td><td><code>dp[x]</code> = đáp án cho tổng x</td></tr>\n<tr><td>Dãy con</td><td>LIS</td><td><code>dp[i]</code> = đáp án cho dãy <strong>kết thúc tại</strong> i</td></tr>\n<tr><td>Hai chuỗi</td><td>LCS, Edit Distance</td><td><code>dp[i][j]</code> = đáp án cho <code>a[0..i)</code> và <code>b[0..j)</code></td></tr>\n<tr><td>Lưới</td><td>Unique Paths, Min Path Sum</td><td><code>dp[r][c]</code></td></tr>\n<tr><td>Knapsack 0/1</td><td>Partition Equal Subset Sum</td><td><code>dp[w]</code> duyệt w <strong>giảm dần</strong></td></tr>\n</tbody></table>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Top-down (memo) và bottom-up (bảng): cái nào dễ viết hơn? Cái nào an toàn hơn với n = 10^5 trong JS? (Gợi ý: call stack.)</li><li>Tại sao Coin Change <strong>không</strong> giải được bằng tham lam (luôn chọn đồng lớn nhất) với mọi bộ xu, trong khi tiền Việt Nam thì được?</li><li>DP đổi bộ nhớ lấy thời gian. Khi nào ta có thể &quot;cuộn&quot; bảng xuống O(1) hoặc O(n) bộ nhớ?</li></ul>\n",
+    "source": "content/03-dsa/14-dynamic-programming.md",
+    "exercises": [
+     {
+      "id": "climbing-stairs",
+      "title": "Climbing Stairs",
+      "difficulty": "easy",
+      "prompt": "<p>Cầu thang <code>n</code> bậc, mỗi lần leo <strong>1 hoặc 2</strong> bậc. Có bao nhiêu cách để lên tới đỉnh? (<code>1 &lt;= n &lt;= 70</code>) (LeetCode 70)</p>\n",
+      "fn": "climbStairs",
+      "starter": "function climbStairs(n) {\n  if (n <= 1) return 1;\n  return climbStairs(n - 1) + climbStairs(n - 2);\n}\n",
+      "solution": "function climbStairs(n) {\n  let a = 1;\n  let b = 1;\n  for (let i = 2; i <= n; i++) {\n    const next = a + b;\n    a = b;\n    b = next;\n  }\n  return b;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Code có sẵn đúng nhưng O(2^n) — thử chạy với n = 45 sẽ thấy rất chậm.</p>\n",
+       "<p>Thêm memo, hoặc lập bảng từ dưới lên: <code>dp[i] = dp[i-1] + dp[i-2]</code>. Chỉ cần nhớ hai giá trị trước.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         1
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         2
+        ],
+        "expected": 2
+       },
+       {
+        "args": [
+         3
+        ],
+        "expected": 3
+       },
+       {
+        "args": [
+         5
+        ],
+        "expected": 8
+       },
+       {
+        "args": [
+         70
+        ],
+        "expected": 308061521170129,
+        "hidden": true,
+        "label": "n = 70 — O(2^n) sẽ không bao giờ xong"
+       }
+      ]
+     },
+     {
+      "id": "house-robber",
+      "title": "House Robber",
+      "difficulty": "medium",
+      "prompt": "<p>Dãy nhà có số tiền <code>nums[i]</code>. Không được lấy ở <strong>hai nhà liền kề</strong> (chuông báo động). Lấy được nhiều nhất bao nhiêu? (LeetCode 198)</p>\n<p><code>[2,7,9,3,1]</code> → <code>12</code> (2 + 9 + 1)</p>\n",
+      "fn": "rob",
+      "starter": "function rob(nums) {\n\n}\n",
+      "solution": "function rob(nums) {\n  let skip = 0;\n  let take = 0;\n  for (const x of nums) {\n    const newTake = skip + x;\n    skip = Math.max(skip, take);\n    take = newTake;\n  }\n  return Math.max(skip, take);\n}\n",
+      "explain": "<p><code>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</code>. O(n) thời gian, O(1) bộ nhớ. Tham lam &quot;lấy các nhà chẵn hoặc các nhà lẻ&quot; là sai: thử <code>[2, 1, 1, 2]</code> (đáp án 4 = nhà 0 + nhà 3).</p>\n",
+      "hints": [
+       "<p>Trạng thái: <code>dp[i]</code> = tiền lớn nhất có thể lấy từ i nhà đầu tiên.</p>\n",
+       "<p>Với nhà thứ i: hoặc <strong>bỏ qua</strong> (<code>dp[i-1]</code>), hoặc <strong>lấy</strong> (<code>dp[i-2] + nums[i]</code>). Lấy max.</p>\n",
+       "<p>Chỉ cần hai biến thay vì cả mảng.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          1,
+          2,
+          3,
+          1
+         ]
+        ],
+        "expected": 4
+       },
+       {
+        "args": [
+         [
+          2,
+          7,
+          9,
+          3,
+          1
+         ]
+        ],
+        "expected": 12
+       },
+       {
+        "args": [
+         [
+          2,
+          1,
+          1,
+          2
+         ]
+        ],
+        "expected": 4
+       },
+       {
+        "args": [
+         [
+          5
+         ]
+        ],
+        "expected": 5
+       },
+       {
+        "args": [
+         []
+        ],
+        "expected": 0
+       }
+      ]
+     },
+     {
+      "id": "coin-change",
+      "title": "Coin Change",
+      "difficulty": "medium",
+      "prompt": "<p>Cho các mệnh giá <code>coins</code> (dùng không giới hạn) và <code>amount</code>. Trả về số đồng xu <strong>ít nhất</strong> để tạo đúng <code>amount</code>, hoặc <code>-1</code> nếu không thể. <code>amount &lt;= 10^4</code>. (LeetCode 322)</p>\n",
+      "fn": "coinChange",
+      "starter": "function coinChange(coins, amount) {\n\n}\n",
+      "solution": "function coinChange(coins, amount) {\n  const dp = new Array(amount + 1).fill(Infinity);\n  dp[0] = 0;\n  for (let x = 1; x <= amount; x++) {\n    for (const c of coins) {\n      if (c <= x && dp[x - c] + 1 < dp[x]) dp[x] = dp[x - c] + 1;\n    }\n  }\n  return dp[amount] === Infinity ? -1 : dp[amount];\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Tham lam (lấy đồng lớn nhất trước) sai với <code>[1, 3, 4]</code>, amount 6.</p>\n",
+       "<p><code>dp[x]</code> = số xu ít nhất để tạo tổng x. <code>dp[x] = min(dp[x - c] + 1)</code> với mọi đồng <code>c &lt;= x</code>. <code>dp[0] = 0</code>.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          1,
+          2,
+          5
+         ],
+         11
+        ],
+        "expected": 3
+       },
+       {
+        "args": [
+         [
+          2
+         ],
+         3
+        ],
+        "expected": -1
+       },
+       {
+        "args": [
+         [
+          1
+         ],
+         0
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         [
+          1,
+          3,
+          4
+         ],
+         6
+        ],
+        "expected": 2
+       },
+       {
+        "args": [
+         [
+          186,
+          419,
+          83,
+          408
+         ],
+         6249
+        ],
+        "expected": 20
+       }
+      ]
+     },
+     {
+      "id": "unique-paths-obstacles",
+      "title": "Đường đi trên lưới có vật cản",
+      "difficulty": "medium",
+      "prompt": "<p>Robot ở góc trên trái của lưới, chỉ đi <strong>sang phải</strong> hoặc <strong>xuống dưới</strong>, muốn tới góc dưới phải. <code>grid[r][c] = 1</code> là vật cản. Đếm số đường đi. (LeetCode 63)</p>\n",
+      "fn": "uniquePathsWithObstacles",
+      "starter": "function uniquePathsWithObstacles(grid) {\n\n}\n",
+      "solution": "function uniquePathsWithObstacles(grid) {\n  const rows = grid.length;\n  const cols = grid[0].length;\n  const dp = new Array(cols).fill(0);\n  dp[0] = grid[0][0] === 1 ? 0 : 1;\n  for (let r = 0; r < rows; r++) {\n    for (let c = 0; c < cols; c++) {\n      if (grid[r][c] === 1) dp[c] = 0;\n      else if (c > 0) dp[c] += dp[c - 1];\n    }\n  }\n  return dp[cols - 1];\n}\n",
+      "explain": "",
+      "hints": [
+       "<p><code>dp[r][c]</code> = số đường tới ô (r, c) = <code>dp[r-1][c] + dp[r][c-1]</code>, và bằng 0 nếu ô là vật cản.</p>\n",
+       "<p>Cẩn thận với hàng đầu/cột đầu và trường hợp ô xuất phát là vật cản.</p>\n",
+       "<p>Tối ưu: chỉ cần một mảng 1 chiều <code>dp[c]</code>, cập nhật từ trái sang phải từng hàng.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          [
+           0,
+           0,
+           0
+          ],
+          [
+           0,
+           1,
+           0
+          ],
+          [
+           0,
+           0,
+           0
+          ]
+         ]
+        ],
+        "expected": 2
+       },
+       {
+        "args": [
+         [
+          [
+           0,
+           1
+          ],
+          [
+           0,
+           0
+          ]
+         ]
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         [
+          [
+           1
+          ]
+         ]
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         [
+          [
+           0
+          ]
+         ]
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         [
+          [
+           0,
+           0
+          ],
+          [
+           1,
+           1
+          ],
+          [
+           0,
+           0
+          ]
+         ]
+        ],
+        "expected": 0
+       }
+      ]
+     },
+     {
+      "id": "longest-increasing-subsequence",
+      "title": "Dãy con tăng dài nhất (LIS)",
+      "difficulty": "medium",
+      "prompt": "<p>Độ dài <strong>dãy con tăng nghiêm ngặt</strong> dài nhất (không cần liên tiếp). (LeetCode 300)</p>\n<p><code>[10,9,2,5,3,7,101,18]</code> → <code>4</code> (<code>[2,3,7,101]</code>)</p>\n<p>O(n²) qua test thường; test ẩn có n = 10^5 cần O(n log n).</p>\n",
+      "fn": "lengthOfLIS",
+      "starter": "function lengthOfLIS(nums) {\n\n}\n",
+      "solution": "function lengthOfLIS(nums) {\n  const tails = [];\n  for (const x of nums) {\n    let lo = 0;\n    let hi = tails.length;\n    while (lo < hi) {\n      const mid = (lo + hi) >> 1;\n      if (tails[mid] < x) lo = mid + 1;\n      else hi = mid;\n    }\n    tails[lo] = x;\n  }\n  return tails.length;\n}\n",
+      "explain": "<p><code>tails</code> luôn tăng dần, nên dùng được binary search. Lưu ý <code>tails</code> <strong>không</strong> phải là một dãy LIS thật — chỉ độ dài của nó là đúng. Đây là bài cho thấy DP + binary search kết hợp thế nào.</p>\n",
+      "hints": [
+       "<p>O(n²): <code>dp[i]</code> = độ dài LIS <strong>kết thúc tại i</strong> = 1 + max(dp[j]) với j &lt; i và nums[j] &lt; nums[i].</p>\n",
+       "<p>O(n log n): giữ mảng <code>tails</code>, trong đó <code>tails[k]</code> = phần tử cuối <strong>nhỏ nhất</strong> của một dãy tăng dài k + 1.</p>\n",
+       "<p>Với mỗi x: tìm vị trí đầu tiên trong <code>tails</code> có giá trị ≥ x (binary search lower bound) và thay bằng x; nếu không có thì push.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          10,
+          9,
+          2,
+          5,
+          3,
+          7,
+          101,
+          18
+         ]
+        ],
+        "expected": 4
+       },
+       {
+        "args": [
+         [
+          0,
+          1,
+          0,
+          3,
+          2,
+          3
+         ]
+        ],
+        "expected": 4
+       },
+       {
+        "args": [
+         [
+          7,
+          7,
+          7,
+          7
+         ]
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         [
+          5
+         ]
+        ],
+        "expected": 1
+       },
+       {
+        "gen": "return [Array.from({ length: 100000 }, (_, i) => (i % 2 ? i : 100000 - i))];",
+        "label": "n = 100.000",
+        "expected": 50001
+       }
+      ]
+     },
+     {
+      "id": "longest-common-subsequence",
+      "title": "Dãy con chung dài nhất (LCS)",
+      "difficulty": "medium",
+      "prompt": "<p>Độ dài <strong>dãy con chung</strong> dài nhất của hai chuỗi (giữ thứ tự, không cần liên tiếp). Độ dài mỗi chuỗi ≤ 1000. (LeetCode 1143)</p>\n<p><code>(&quot;abcde&quot;, &quot;ace&quot;)</code> → <code>3</code></p>\n",
+      "fn": "longestCommonSubsequence",
+      "starter": "function longestCommonSubsequence(a, b) {\n\n}\n",
+      "solution": "function longestCommonSubsequence(a, b) {\n  const m = a.length;\n  const n = b.length;\n  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));\n  for (let i = 1; i <= m; i++) {\n    for (let j = 1; j <= n; j++) {\n      if (a[i - 1] === b[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;\n      else dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);\n    }\n  }\n  return dp[m][n];\n}\n",
+      "explain": "<p>O(m·n) thời gian và bộ nhớ (có thể giảm còn O(min(m, n)) bằng hai hàng). LCS là nền tảng của <code>git diff</code> và so sánh DNA.</p>\n",
+      "hints": [
+       "<p><code>dp[i][j]</code> = LCS của <code>a</code> với i ký tự đầu và <code>b</code> với j ký tự đầu. Kích thước bảng (m+1) × (n+1), hàng/cột 0 là chuỗi rỗng.</p>\n",
+       "<p>Nếu <code>a[i-1] === b[j-1]</code>: <code>dp[i][j] = dp[i-1][j-1] + 1</code>. Ngược lại: <code>max(dp[i-1][j], dp[i][j-1])</code>.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         "abcde",
+         "ace"
+        ],
+        "expected": 3
+       },
+       {
+        "args": [
+         "abc",
+         "abc"
+        ],
+        "expected": 3
+       },
+       {
+        "args": [
+         "abc",
+         "def"
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         "",
+         "abc"
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         "bsbininm",
+         "jmjkbkjkv"
+        ],
+        "expected": 1
+       },
+       {
+        "gen": "let a = \"\", b = \"\"; for (let i = 0; i < 1000; i++) { a += \"ab\"[i % 2]; b += \"ba\"[i % 3 === 0 ? 0 : 1]; } return [a, b];",
+        "label": "hai chuỗi dài 1000",
+        "expected": 833
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dsa-greedy",
+    "title": "Tham lam (Greedy)",
+    "html": "<p>Thuật toán tham lam đưa ra lựa chọn <strong>tốt nhất tại mỗi bước</strong> và không bao giờ quay lại. Khi đúng, nó thường cho lời giải O(n) hoặc O(n log n) rất ngắn. Cái khó: <strong>chứng minh</strong> nó đúng — và nhận ra khi nào nó sai.</p>\n<h2>Khi tham lam đúng</h2>\n<pre class=\"code\" data-run><code class=\"language-js\">// Mua bán cổ phiếu một lần: lãi lớn nhất\nfunction maxProfit(prices) {\n  let minPrice = Infinity, best = 0;\n  for (const p of prices) {\n    minPrice = Math.min(minPrice, p);   // giá mua tốt nhất cho tới hôm nay\n    best = Math.max(best, p - minPrice); // nếu bán hôm nay\n  }\n  return best;\n}\nconsole.log(maxProfit([7, 1, 5, 3, 6, 4])); // 5 (mua 1, bán 6)</code></pre>\n<p>Mỗi ngày chỉ cần biết giá <strong>thấp nhất trước đó</strong> — không cần xét mọi cặp (mua, bán) như O(n²).</p>\n<h2>Khi tham lam sai</h2>\n<pre class=\"code\" data-run><code class=\"language-js\">// Đổi tiền tham lam: luôn chọn đồng lớn nhất\nfunction greedyCoins(coins, amount) {\n  const sorted = [...coins].sort((a, b) =&gt; b - a);\n  let count = 0;\n  for (const c of sorted) {\n    count += Math.floor(amount / c);\n    amount %= c;\n  }\n  return amount === 0 ? count : -1;\n}\nconsole.log(greedyCoins([1, 5, 10, 25], 30)); // 2 (25 + 5) — đúng\nconsole.log(greedyCoins([1, 3, 4], 6));       // 3 (4 + 1 + 1) — SAI, tối ưu là 2 (3 + 3)</code></pre>\n<blockquote><p><strong>Quy tắc thực hành:</strong> khi nghĩ ra một chiến lược tham lam, <strong>cố tìm phản ví dụ</strong> với input nhỏ trước khi code. Không tìm được và có lập luận &quot;đổi chỗ&quot; (exchange argument) hợp lý → tham lam. Tìm được → nghĩ đến DP.</p>\n</blockquote>\n<h2>Thuật toán Kadane — tổng đoạn con lớn nhất</h2>\n<p>Tại mỗi vị trí: tiếp tục đoạn hiện tại, <strong>hoặc</strong> bắt đầu lại từ phần tử này — chọn cái lớn hơn. Nếu tổng đoạn hiện tại đã âm, nó chỉ &quot;kéo lùi&quot; phần sau → bỏ đi.</p>\n<pre class=\"code\" data-run><code class=\"language-js\">function maxSubArray(nums) {\n  let current = nums[0], best = nums[0];\n  for (let i = 1; i &lt; nums.length; i++) {\n    current = Math.max(nums[i], current + nums[i]);\n    best = Math.max(best, current);\n  }\n  return best;\n}\nconsole.log(maxSubArray([-2, 1, -3, 4, -1, 2, 1, -5, 4])); // 6 ([4,-1,2,1])</code></pre>\n<p>Kadane cũng có thể xem là DP với <code>dp[i]</code> = tổng lớn nhất của đoạn <strong>kết thúc tại i</strong> — ranh giới giữa tham lam và DP đôi khi rất mờ.</p>\n<h2>Bài toán khoảng (interval scheduling)</h2>\n<p>Chọn nhiều cuộc họp nhất không trùng giờ: <strong>sort theo giờ kết thúc</strong>, luôn chọn cuộc họp kết thúc sớm nhất còn chọn được. Lý do: kết thúc sớm nhất để lại nhiều thời gian nhất cho phần còn lại.</p>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Interval scheduling: tại sao sort theo giờ <strong>kết thúc</strong> mà không phải giờ <strong>bắt đầu</strong> hay <strong>độ dài</strong>? Tìm phản ví dụ cho hai cách kia.</li><li>Tham lam và DP đều dựa trên &quot;cấu trúc con tối ưu&quot;. Điểm khác biệt cốt lõi là gì? (Gợi ý: tham lam chỉ xét <strong>một</strong> lựa chọn ở mỗi bước.)</li></ul>\n",
+    "source": "content/03-dsa/15-greedy.md",
+    "exercises": [
+     {
+      "id": "best-time-stock",
+      "title": "Best Time to Buy and Sell Stock",
+      "difficulty": "easy",
+      "prompt": "<p><code>prices[i]</code> là giá cổ phiếu ngày i. Mua <strong>một lần</strong> rồi bán <strong>một lần</strong> vào một ngày <strong>sau</strong> đó. Lãi lớn nhất là bao nhiêu (không lãi thì 0)? n ≤ 10^5. (LeetCode 121)</p>\n",
+      "fn": "maxProfit",
+      "starter": "function maxProfit(prices) {\n\n}\n",
+      "solution": "function maxProfit(prices) {\n  let minPrice = Infinity;\n  let best = 0;\n  for (const p of prices) {\n    if (p < minPrice) minPrice = p;\n    else if (p - minPrice > best) best = p - minPrice;\n  }\n  return best;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Duyệt một lần, nhớ giá thấp nhất đã thấy. Mỗi ngày tính lãi nếu bán hôm đó.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          7,
+          1,
+          5,
+          3,
+          6,
+          4
+         ]
+        ],
+        "expected": 5
+       },
+       {
+        "args": [
+         [
+          7,
+          6,
+          4,
+          3,
+          1
+         ]
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         [
+          2,
+          4,
+          1
+         ]
+        ],
+        "expected": 2
+       },
+       {
+        "args": [
+         [
+          1
+         ]
+        ],
+        "expected": 0
+       },
+       {
+        "gen": "return [Array.from({ length: 100000 }, (_, i) => 100000 - i).concat([100001])];",
+        "label": "n = 100.001, giảm dần rồi tăng vọt",
+        "expected": 100000
+       }
+      ]
+     },
+     {
+      "id": "maximum-subarray",
+      "title": "Maximum Subarray (Kadane)",
+      "difficulty": "medium",
+      "prompt": "<p>Tìm tổng lớn nhất của một <strong>đoạn con liên tiếp khác rỗng</strong>. n ≤ 10^5. (LeetCode 53)</p>\n",
+      "fn": "maxSubArray",
+      "starter": "function maxSubArray(nums) {\n\n}\n",
+      "solution": "function maxSubArray(nums) {\n  let current = nums[0];\n  let best = nums[0];\n  for (let i = 1; i < nums.length; i++) {\n    current = Math.max(nums[i], current + nums[i]);\n    if (current > best) best = current;\n  }\n  return best;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Tại mỗi phần tử: nối vào đoạn đang xét, hay bắt đầu đoạn mới từ đây? <code>current = max(x, current + x)</code>.</p>\n",
+       "<p>Khởi tạo bằng <code>nums[0]</code> (không phải 0) để đúng khi mọi số đều âm.</p>\n"
+      ],
+      "followUp": "<p>Mở rộng: trả về luôn <strong>vị trí bắt đầu và kết thúc</strong> của đoạn. Và nếu mảng là <strong>vòng tròn</strong> (LeetCode 918) thì sao?</p>\n",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          -2,
+          1,
+          -3,
+          4,
+          -1,
+          2,
+          1,
+          -5,
+          4
+         ]
+        ],
+        "expected": 6
+       },
+       {
+        "args": [
+         [
+          1
+         ]
+        ],
+        "expected": 1
+       },
+       {
+        "args": [
+         [
+          5,
+          4,
+          -1,
+          7,
+          8
+         ]
+        ],
+        "expected": 23
+       },
+       {
+        "args": [
+         [
+          -3,
+          -1,
+          -2
+         ]
+        ],
+        "expected": -1
+       },
+       {
+        "gen": "return [Array.from({ length: 100000 }, (_, i) => (i % 3 === 0 ? -1 : 2))];",
+        "label": "n = 100.000",
+        "expected": 100000
+       }
+      ]
+     },
+     {
+      "id": "jump-game",
+      "title": "Jump Game",
+      "difficulty": "medium",
+      "prompt": "<p>Đứng ở chỉ số 0; <code>nums[i]</code> là bước nhảy <strong>tối đa</strong> từ vị trí i. Có tới được chỉ số cuối không? n ≤ 10^5. (LeetCode 55)</p>\n",
+      "fn": "canJump",
+      "starter": "function canJump(nums) {\n\n}\n",
+      "solution": "function canJump(nums) {\n  let reach = 0;\n  for (let i = 0; i < nums.length; i++) {\n    if (i > reach) return false;\n    reach = Math.max(reach, i + nums[i]);\n    if (reach >= nums.length - 1) return true;\n  }\n  return true;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Giữ <code>reach</code> = chỉ số xa nhất có thể tới được cho đến lúc này.</p>\n",
+       "<p>Nếu đang đứng ở <code>i &gt; reach</code> → kẹt. Ngược lại cập nhật <code>reach = max(reach, i + nums[i])</code>.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          2,
+          3,
+          1,
+          1,
+          4
+         ]
+        ],
+        "expected": true
+       },
+       {
+        "args": [
+         [
+          3,
+          2,
+          1,
+          0,
+          4
+         ]
+        ],
+        "expected": false
+       },
+       {
+        "args": [
+         [
+          0
+         ]
+        ],
+        "expected": true
+       },
+       {
+        "args": [
+         [
+          0,
+          1
+         ]
+        ],
+        "expected": false
+       },
+       {
+        "gen": "const a = new Array(100000).fill(1); a[50000] = 0; return [a];",
+        "label": "n = 100.000, có một số 0 chặn đường",
+        "expected": false
+       }
+      ]
+     },
+     {
+      "id": "non-overlapping-meetings",
+      "title": "Xếp nhiều cuộc họp nhất",
+      "difficulty": "medium",
+      "prompt": "<p>Mỗi cuộc họp là <code>[start, end]</code>. Chọn được <strong>nhiều cuộc họp nhất</strong> sao cho không có hai cuộc nào chồng nhau (cuộc này kết thúc đúng lúc cuộc kia bắt đầu thì <strong>được</strong>).</p>\n",
+      "fn": "maxMeetings",
+      "starter": "function maxMeetings(meetings) {\n\n}\n",
+      "solution": "function maxMeetings(meetings) {\n  const sorted = [...meetings].sort((a, b) => a[1] - b[1]);\n  let count = 0;\n  let lastEnd = -Infinity;\n  for (const [start, end] of sorted) {\n    if (start >= lastEnd) {\n      count++;\n      lastEnd = end;\n    }\n  }\n  return count;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Sort theo giờ <strong>kết thúc</strong> tăng dần.</p>\n",
+       "<p>Duyệt và chọn cuộc họp nếu nó bắt đầu sau (hoặc đúng lúc) cuộc họp đã chọn gần nhất kết thúc.</p>\n"
+      ],
+      "followUp": "<p>Hãy tìm phản ví dụ cho thấy sort theo giờ bắt đầu, hoặc theo độ dài ngắn nhất, đều cho kết quả sai.</p>\n",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "args": [
+         [
+          [
+           1,
+           2
+          ],
+          [
+           2,
+           3
+          ],
+          [
+           3,
+           4
+          ],
+          [
+           1,
+           3
+          ]
+         ]
+        ],
+        "expected": 3
+       },
+       {
+        "args": [
+         [
+          [
+           1,
+           10
+          ],
+          [
+           2,
+           3
+          ],
+          [
+           4,
+           5
+          ]
+         ]
+        ],
+        "expected": 2
+       },
+       {
+        "args": [
+         [
+          [
+           1,
+           4
+          ],
+          [
+           3,
+           5
+          ],
+          [
+           4,
+           8
+          ],
+          [
+           5,
+           6
+          ]
+         ]
+        ],
+        "expected": 2
+       },
+       {
+        "args": [
+         []
+        ],
+        "expected": 0
+       },
+       {
+        "args": [
+         [
+          [
+           5,
+           9
+          ],
+          [
+           1,
+           3
+          ],
+          [
+           3,
+           5
+          ],
+          [
+           0,
+           7
+          ]
+         ]
+        ],
+        "expected": 3
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "interview",
+  "title": "Phỏng vấn",
+  "desc": "<p>Cách tiếp cận một câu hỏi thuật toán trước người phỏng vấn, bảng nhận diện pattern, kế hoạch ôn luyện và các câu hỏi JavaScript kinh điển.</p>\n",
+  "lessons": [
+   {
+    "id": "interview-approach",
+    "title": "Cách giải bài trong buổi phỏng vấn",
+    "html": "<p>Người phỏng vấn <strong>không chỉ chấm code đúng hay sai</strong>. Họ đánh giá: bạn có làm rõ yêu cầu không, có giao tiếp không, có xét trường hợp biên không, có phân tích được độ phức tạp và trade-off không. Một lời giải tối ưu viết trong im lặng thường <strong>được điểm thấp hơn</strong> một lời giải trung bình được trình bày rõ ràng rồi cải tiến dần.</p>\n<h2>Khung 6 bước (UMPIRE)</h2>\n<ol><li><strong>Understand — Hiểu đề</strong> (2–5 phút) Nhắc lại đề bằng lời của bạn. Hỏi: kích thước input? có số âm/trùng lặp/rỗng không? input đã sắp xếp chưa? được sửa input không? trả về gì khi không có đáp án?</li><li><strong>Match — Nhận diện pattern</strong> Bài này giống dạng nào đã gặp? (Xem bảng bên dưới.)</li><li><strong>Plan — Lên kế hoạch</strong> Nói ra cách brute force và độ phức tạp của nó trước. Sau đó đề xuất cách tối ưu. <strong>Thống nhất với người phỏng vấn trước khi code.</strong></li><li><strong>Implement — Viết code</strong> Đặt tên biến rõ nghĩa. Vừa viết vừa nói bạn đang làm gì. Hàm phụ nếu logic dài.</li><li><strong>Review — Tự kiểm tra</strong> Chạy tay với ví dụ nhỏ. Thử trường hợp biên: rỗng, một phần tử, tất cả giống nhau, giá trị cực lớn/âm.</li><li><strong>Evaluate — Đánh giá</strong> Nêu độ phức tạp thời gian/bộ nhớ. Nói trade-off và hướng cải tiến nếu có thêm thời gian.</li></ol>\n<blockquote><p><strong>Bí thì làm gì?</strong> Nói ra suy nghĩ (&quot;em đang nghĩ đến hash map vì cần tra cứu nhanh, nhưng chưa rõ key là gì&quot;). Thử ví dụ nhỏ bằng tay để tìm quy luật. Hỏi gợi ý cũng được — im lặng 5 phút mới là tín hiệu xấu.</p>\n</blockquote>\n<h2>Bảng nhận diện pattern</h2>\n<table><thead><tr><th>Nếu đề bài có...</th><th>Nghĩ đến</th></tr></thead>\n<tbody>\n<tr><td>Mảng <strong>đã sắp xếp</strong>, tìm cặp/bộ ba</td><td>Hai con trỏ, binary search</td></tr>\n<tr><td>&quot;Tìm / đếm cặp có tổng/hiệu bằng k&quot;, &quot;đã gặp chưa&quot;</td><td>Hash map / Set</td></tr>\n<tr><td>&quot;Đoạn con / chuỗi con <strong>liên tiếp</strong> dài nhất / ngắn nhất&quot;</td><td>Cửa sổ trượt</td></tr>\n<tr><td>&quot;Tổng đoạn con bằng k&quot; (có số âm), truy vấn tổng đoạn</td><td>Prefix sum (+ hash map)</td></tr>\n<tr><td>&quot;Phần tử lớn hơn/nhỏ hơn tiếp theo&quot;, ngoặc, biểu thức</td><td>Stack / monotonic stack</td></tr>\n<tr><td>&quot;K lớn nhất / nhỏ nhất / gần nhất&quot;, gộp k dãy</td><td>Heap</td></tr>\n<tr><td>&quot;Giá trị nhỏ nhất sao cho vẫn khả thi&quot;, n hoặc giá trị tới 10^9</td><td>Binary search trên đáp án</td></tr>\n<tr><td>Cây</td><td>DFS đệ quy (khuôn kết hợp trái/phải), BFS cho theo tầng</td></tr>\n<tr><td>Lưới, mạng lưới, quan hệ phụ thuộc</td><td>Đồ thị: BFS (đường ngắn nhất), DFS, topo sort, union-find</td></tr>\n<tr><td>&quot;Liệt kê <strong>tất cả</strong>&quot; tập con / hoán vị / tổ hợp, n ≤ 20</td><td>Backtracking</td></tr>\n<tr><td>&quot;Bao nhiêu cách&quot;, &quot;lớn nhất/nhỏ nhất&quot; với lựa chọn từng bước</td><td>Quy hoạch động</td></tr>\n<tr><td>Linked list: giữa, chu trình, k từ cuối</td><td>Con trỏ nhanh – chậm</td></tr>\n<tr><td>Khoảng thời gian, lịch họp</td><td>Sort + tham lam / quét</td></tr>\n</tbody></table>\n<h2>Kế hoạch ôn luyện gợi ý (8–12 tuần)</h2>\n<table><thead><tr><th>Tuần</th><th>Nội dung</th><th>Mục tiêu</th></tr></thead>\n<tbody>\n<tr><td>1–2</td><td>Chặng 1 (JS cơ bản)</td><td>Viết code không cần tra cú pháp</td></tr>\n<tr><td>3</td><td>Chặng 2 (coding test) + Big-O</td><td>Đọc ràng buộc → đoán được độ phức tạp cần đạt</td></tr>\n<tr><td>4–5</td><td>Hash map, two pointers, sliding window, prefix sum, stack</td><td>Giải easy trong 15', medium trong 30'</td></tr>\n<tr><td>6</td><td>Linked list, đệ quy, binary search, sorting</td><td></td></tr>\n<tr><td>7–8</td><td>Cây, heap, đồ thị</td><td></td></tr>\n<tr><td>9–10</td><td>Backtracking, DP, greedy</td><td></td></tr>\n<tr><td>11–12</td><td>Làm đề tổng hợp có bấm giờ, phỏng vấn thử với bạn bè</td><td>Nói to khi giải</td></tr>\n</tbody></table>\n<p>Sau khi xong các bài trên trang này, chuyển sang LeetCode/NeetCode 150 và luyện theo <strong>pattern</strong> chứ không theo số thứ tự bài.</p>\n<h2>Những lỗi khiến ứng viên trượt dù code chạy đúng</h2>\n<ul><li>Lao vào code ngay, không hỏi làm rõ.</li><li>Không nói được độ phức tạp, hoặc nói sai (quên <code>includes</code>/<code>slice</code>/<code>shift</code> là O(n)).</li><li>Không tự test; để người phỏng vấn tìm bug.</li><li>Tên biến <code>a</code>, <code>b</code>, <code>tmp2</code> khắp nơi.</li><li>Khăng khăng một hướng khi người phỏng vấn đã gợi ý hướng khác.</li></ul>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Tại sao nên trình bày brute force trước dù biết nó không đủ nhanh? (Gợi ý: nó chứng minh bạn hiểu đề, cho bạn một &quot;lưới an toàn&quot;, và là điểm xuất phát để tối ưu.)</li><li>Nếu còn 5 phút mà lời giải tối ưu chưa xong, bạn sẽ làm gì?</li></ul>\n",
+    "source": "content/04-interview/01-approach.md",
+    "exercises": []
+   },
+   {
+    "id": "interview-js",
+    "title": "Câu hỏi phỏng vấn JavaScript",
+    "html": "<p>Vòng phỏng vấn frontend/fullstack thường có thêm câu hỏi về <strong>chính ngôn ngữ JS</strong> và yêu cầu tự cài đặt các tiện ích quen thuộc. Bài này tổng hợp những câu hay gặp nhất — mỗi câu đều đã được giải thích ở các bài trước, hãy ôn lại và tự trả lời <strong>thành tiếng</strong> trước khi đọc đáp án.</p>\n<h2>Câu hỏi lý thuyết hay gặp</h2>\n<p><strong>1. <code>var</code>, <code>let</code>, <code>const</code> khác nhau thế nào?</strong> Scope (function vs block), hoisting (<code>var</code> = <code>undefined</code>, <code>let</code>/<code>const</code> = TDZ), gán lại được không. → bài <em>Biến và kiểu dữ liệu</em>, <em>Scope và closure</em>.</p>\n<p><strong>2. Closure là gì? Cho ví dụ thực tế.</strong> Hàm nhớ môi trường biến nơi nó được tạo. Ví dụ: biến private, <code>once</code>, memoize, debounce, React hooks. → bài <em>Scope và closure</em>.</p>\n<p><strong>3. Giải thích event loop. <code>setTimeout(fn, 0)</code> và <code>Promise.then</code> cái nào chạy trước?</strong> Call stack → microtask queue (Promise) → macrotask queue (setTimeout). → bài <em>Xử lý lỗi và bất đồng bộ</em>.</p>\n<p><strong>4. <code>this</code> được xác định thế nào? Arrow function khác gì?</strong> 4 luật: <code>new</code>, <code>call/apply/bind</code>, gọi qua object, gọi trơn; arrow lấy <code>this</code> từ scope bao ngoài. → bài <em>Class và this</em>.</p>\n<p><strong>5. <code>==</code> và <code>===</code>?</strong> Ép kiểu ngầm. Luôn dùng <code>===</code>.</p>\n<p><strong>6. Prototype / kế thừa trong JS hoạt động thế nào?</strong> Chuỗi prototype; <code>class</code> là cú pháp đường của prototype.</p>\n<p><strong>7. Copy nông vs copy sâu?</strong> Spread <code>{...o}</code> chỉ copy tầng ngoài; <code>structuredClone</code> / tự viết đệ quy để copy sâu.</p>\n<p><strong>8. <code>null</code> vs <code>undefined</code>?</strong> &quot;Cố ý không có giá trị&quot; vs &quot;chưa được gán&quot;.</p>\n<p><strong>9. Promise.all vs Promise.allSettled vs Promise.race?</strong> Dừng khi lỗi đầu tiên / chờ tất cả / cái nào xong trước.</p>\n<p><strong>10. Debounce vs throttle?</strong></p>\n<ul><li><strong>Debounce</strong>: chỉ chạy <strong>sau khi</strong> sự kiện ngừng xảy ra một khoảng thời gian. Dùng cho ô tìm kiếm gõ phím (chỉ gọi API khi người dùng ngừng gõ).</li><li><strong>Throttle</strong>: chạy <strong>tối đa một lần</strong> mỗi khoảng thời gian. Dùng cho sự kiện scroll/resize.</li></ul>\n<pre class=\"code\" data-run><code class=\"language-js\">function debounce(fn, ms) {\n  let timer = null;\n  return function (...args) {\n    clearTimeout(timer);                       // huỷ lần hẹn trước\n    timer = setTimeout(() =&gt; fn.apply(this, args), ms);\n  };\n}\n\nconst log = debounce((q) =&gt; console.log(&quot;Gọi API tìm:&quot;, q), 100);\nlog(&quot;j&quot;); log(&quot;ja&quot;); log(&quot;jav&quot;); log(&quot;java&quot;); // chỉ lần cuối được chạy</code></pre>\n<h2>Câu hỏi thiết kế: LRU Cache</h2>\n<p>&quot;Thiết kế cache có dung lượng giới hạn; khi đầy thì xoá phần tử <strong>ít được dùng gần đây nhất</strong>. <code>get</code> và <code>put</code> đều O(1).&quot;</p>\n<p>Cách kinh điển: <strong>hash map + danh sách liên kết đôi</strong>. Trong JS có một mẹo: <code>Map</code> <strong>giữ thứ tự chèn</strong>, nên &quot;đưa lên đầu&quot; = xoá rồi chèn lại, và phần tử cũ nhất là <code>map.keys().next().value</code>. Người phỏng vấn có thể chấp nhận mẹo này, nhưng hãy sẵn sàng giải thích (hoặc viết) phiên bản linked list.</p>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Debounce dùng closure ở đâu? Nếu viết <code>let timer</code> <strong>bên trong</strong> hàm trả về thì chuyện gì xảy ra?</li><li>Tại sao LRU cache cần <strong>danh sách liên kết đôi</strong> chứ không phải đơn? (Gợi ý: xoá một node ở giữa trong O(1).)</li></ul>\n",
+    "source": "content/04-interview/02-js-questions.md",
+    "exercises": [
+     {
+      "id": "debounce",
+      "title": "Cài đặt debounce",
+      "difficulty": "medium",
+      "prompt": "<p>Viết <code>debounce(fn, ms)</code> trả về hàm mới: mỗi lần được gọi, nó <strong>hẹn giờ lại</strong> — <code>fn</code> chỉ thực sự chạy sau khi đã <strong>ngừng gọi</strong> <code>ms</code> mili-giây, với <strong>tham số của lần gọi cuối cùng</strong>. Giữ đúng <code>this</code>.</p>\n",
+      "fn": "debounce",
+      "starter": "function debounce(fn, ms) {\n\n}\n",
+      "solution": "function debounce(fn, ms) {\n  let timer = null;\n  return function (...args) {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn.apply(this, args), ms);\n  };\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Closure giữ biến <code>timer</code>. Mỗi lần gọi: <code>clearTimeout(timer)</code> rồi hẹn lại.</p>\n",
+       "<p>Dùng <code>function (...args)</code> (không phải arrow) cho hàm trả về để nhận <code>this</code> của người gọi, và arrow bên trong <code>setTimeout</code> để giữ <code>this</code> đó.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "code": "const calls = []; const d = debounce((x) => calls.push(x), 40); d(1); d(2); d(3); await new Promise((r) => setTimeout(r, 100)); return calls;",
+        "label": "gọi 3 lần liên tiếp → chạy 1 lần với tham số cuối",
+        "expected": [
+         3
+        ]
+       },
+       {
+        "code": "const calls = []; const d = debounce((x) => calls.push(x), 30); d(\"a\"); await new Promise((r) => setTimeout(r, 80)); d(\"b\"); await new Promise((r) => setTimeout(r, 80)); return calls;",
+        "label": "hai lần gọi cách xa nhau → chạy 2 lần",
+        "expected": [
+         "a",
+         "b"
+        ]
+       },
+       {
+        "code": "let ran = false; const d = debounce(() => { ran = true; }, 50); d(); await new Promise((r) => setTimeout(r, 10)); return ran;",
+        "label": "chưa hết thời gian chờ thì chưa chạy",
+        "expected": false
+       },
+       {
+        "code": "const obj = { name: \"obj\", calls: [] }; obj.save = debounce(function () { this.calls.push(this.name); }, 20); obj.save(); await new Promise((r) => setTimeout(r, 60)); return obj.calls;",
+        "label": "giữ đúng this",
+        "expected": [
+         "obj"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "lru-cache",
+      "title": "LRU Cache",
+      "difficulty": "medium",
+      "prompt": "<p>Cài đặt class <code>LRUCache</code> (LeetCode 146):</p>\n<ul><li><code>constructor(capacity)</code></li><li><code>get(key)</code>: trả về giá trị, hoặc <code>-1</code> nếu không có. Truy cập làm key thành &quot;mới dùng gần nhất&quot;.</li><li><code>put(key, value)</code>: thêm/cập nhật. Nếu vượt <code>capacity</code>, xoá key <strong>ít được dùng gần đây nhất</strong>.</li></ul>\n<p>Cả hai thao tác O(1). Test ẩn thực hiện 200.000 thao tác.</p>\n",
+      "fn": null,
+      "starter": "class LRUCache {\n  constructor(capacity) {\n\n  }\n  get(key) {\n\n  }\n  put(key, value) {\n\n  }\n}\n",
+      "solution": "class LRUCache {\n  constructor(capacity) {\n    this.capacity = capacity;\n    this.map = new Map();\n  }\n  get(key) {\n    if (!this.map.has(key)) return -1;\n    const value = this.map.get(key);\n    this.map.delete(key);\n    this.map.set(key, value);\n    return value;\n  }\n  put(key, value) {\n    if (this.map.has(key)) this.map.delete(key);\n    this.map.set(key, value);\n    if (this.map.size > this.capacity) {\n      this.map.delete(this.map.keys().next().value);\n    }\n  }\n}\n",
+      "explain": "",
+      "hints": [
+       "<p><code>Map</code> duyệt theo <strong>thứ tự chèn</strong>. Key cũ nhất là <code>map.keys().next().value</code>.</p>\n",
+       "<p>&quot;Đánh dấu vừa dùng&quot; = <code>delete</code> rồi <code>set</code> lại để key về cuối.</p>\n",
+       "<p>Thử thách: viết lại bằng hash map + danh sách liên kết đôi (node giả đầu/cuối) như các ngôn ngữ không có Map giữ thứ tự.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "code": "const c = new LRUCache(2); c.put(1, 1); c.put(2, 2); const a = c.get(1); c.put(3, 3); const b = c.get(2); c.put(4, 4); return [a, b, c.get(1), c.get(3), c.get(4)];",
+        "label": "ví dụ LeetCode 146",
+        "expected": [
+         1,
+         -1,
+         -1,
+         3,
+         4
+        ]
+       },
+       {
+        "code": "const c = new LRUCache(1); c.put(\"x\", 1); c.put(\"x\", 2); return c.get(\"x\");",
+        "label": "cập nhật giá trị key đã có",
+        "expected": 2
+       },
+       {
+        "code": "const c = new LRUCache(2); c.put(1, 1); c.put(2, 2); c.put(1, 10); c.put(3, 3); return [c.get(1), c.get(2), c.get(3)];",
+        "label": "put lên key cũ cũng làm nó \"mới\"",
+        "expected": [
+         10,
+         -1,
+         3
+        ]
+       },
+       {
+        "hidden": true,
+        "code": "const c = new LRUCache(1000); let s = 0; for (let i = 0; i < 100000; i++) { c.put(i, i); s += c.get(i - 500) === -1 ? 0 : 1; } return s;",
+        "label": "200.000 thao tác",
+        "expected": 99302
+       }
+      ]
+     },
+     {
+      "id": "deep-clone",
+      "title": "Deep clone",
+      "difficulty": "medium",
+      "prompt": "<p>Viết <code>deepClone(value)</code> sao chép sâu: mảng, object thường, <code>Map</code>, <code>Set</code>, <code>Date</code> lồng nhau tuỳ ý; giá trị nguyên thuỷ giữ nguyên. Phải xử lý được <strong>tham chiếu vòng</strong> (object trỏ về chính nó) — không được lặp vô hạn. Không dùng <code>structuredClone</code> hay <code>JSON</code>.</p>\n",
+      "fn": "deepClone",
+      "starter": "function deepClone(value) {\n\n}\n",
+      "solution": "function deepClone(value, seen = new Map()) {\n  if (value === null || typeof value !== \"object\") return value;\n  if (seen.has(value)) return seen.get(value);\n  if (value instanceof Date) return new Date(value.getTime());\n  if (value instanceof Map) {\n    const copy = new Map();\n    seen.set(value, copy);\n    value.forEach((v, k) => copy.set(deepClone(k, seen), deepClone(v, seen)));\n    return copy;\n  }\n  if (value instanceof Set) {\n    const copy = new Set();\n    seen.set(value, copy);\n    value.forEach((v) => copy.add(deepClone(v, seen)));\n    return copy;\n  }\n  const copy = Array.isArray(value) ? [] : {};\n  seen.set(value, copy);\n  for (const key of Object.keys(value)) copy[key] = deepClone(value[key], seen);\n  return copy;\n}\n",
+      "explain": "",
+      "hints": [
+       "<p>Base case: giá trị nguyên thuỷ (và <code>null</code>) trả về chính nó.</p>\n",
+       "<p>Tham chiếu vòng: dùng <code>Map</code> ghi &quot;object gốc → bản sao&quot;. Gặp lại object gốc thì trả về bản sao đã tạo. <strong>Ghi vào Map trước khi</strong> đệ quy vào con.</p>\n",
+       "<p>Xử lý riêng <code>Date</code>, <code>Map</code>, <code>Set</code> trước khi rơi vào nhánh object/mảng thường.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "code": "const o = { a: 1, b: { c: [1, 2, { d: 3 }] } }; const c = deepClone(o); c.b.c[2].d = 99; return [o.b.c[2].d, c.b.c[2].d, c !== o, c.b !== o.b];",
+        "label": "object lồng nhau độc lập với bản gốc",
+        "expected": [
+         3,
+         99,
+         true,
+         true
+        ]
+       },
+       {
+        "code": "return [deepClone(5), deepClone(\"x\"), deepClone(null), deepClone(undefined)];",
+        "label": "giá trị nguyên thuỷ",
+        "expected": [
+         5,
+         "x",
+         null,
+         undefined
+        ]
+       },
+       {
+        "code": "const o = { name: \"loop\" }; o.self = o; const c = deepClone(o); return [c.self === c, c !== o];",
+        "label": "tham chiếu vòng",
+        "expected": [
+         true,
+         true
+        ]
+       },
+       {
+        "code": "const m = new Map([[\"k\", { v: 1 }]]); const s = new Set([1, 2]); const c = deepClone({ m, s, d: new Date(0) }); c.m.get(\"k\").v = 2; return [m.get(\"k\").v, c.m instanceof Map, c.s.has(2), c.s !== s, c.d.getTime(), c.d instanceof Date];",
+        "label": "Map, Set, Date",
+        "expected": [
+         1,
+         true,
+         true,
+         true,
+         0,
+         true
+        ]
+       },
+       {
+        "code": "const a = [1, [2, [3]]]; const c = deepClone(a); return [Array.isArray(c), Array.isArray(c[1]), c[1][1] !== a[1][1], c];",
+        "label": "mảng lồng nhau",
+        "expected": [
+         true,
+         true,
+         true,
+         [
+          1,
+          [
+           2,
+           [
+            3
+           ]
+          ]
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "curry",
+      "title": "Curry",
+      "difficulty": "medium",
+      "prompt": "<p>Viết <code>curry(fn)</code>: trả về hàm có thể gọi với tham số <strong>chia thành nhiều lần</strong>; khi đã đủ số tham số của <code>fn</code> (<code>fn.length</code>) thì gọi <code>fn</code>.</p>\n<pre class=\"code\"><code class=\"language-js\">const add3 = curry((a, b, c) =&gt; a + b + c);\nadd3(1)(2)(3);   // 6\nadd3(1, 2)(3);   // 6\nadd3(1)(2, 3);   // 6\nadd3(1, 2, 3);   // 6</code></pre>\n",
+      "fn": "curry",
+      "starter": "function curry(fn) {\n\n}\n",
+      "solution": "function curry(fn) {\n  return function curried(...args) {\n    if (args.length >= fn.length) return fn.apply(this, args);\n    return (...more) => curried.apply(this, args.concat(more));\n  };\n}\n",
+      "explain": "",
+      "hints": [
+       "<p><code>fn.length</code> là số tham số khai báo của hàm.</p>\n",
+       "<p>Hàm trả về gom tham số: đủ thì gọi <code>fn</code>, chưa đủ thì trả về một hàm mới nhận thêm tham số và <strong>gọi lại chính nó</strong> với danh sách đã nối.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "tests": [
+       {
+        "code": "const add3 = curry((a, b, c) => a + b + c); return [add3(1)(2)(3), add3(1, 2)(3), add3(1)(2, 3), add3(1, 2, 3)];",
+        "label": "các cách gọi khác nhau",
+        "expected": [
+         6,
+         6,
+         6,
+         6
+        ]
+       },
+       {
+        "code": "const join = curry((a, b) => a + \"-\" + b); const withA = join(\"a\"); return [withA(\"x\"), withA(\"y\")];",
+        "label": "dùng lại hàm đã áp một phần",
+        "expected": [
+         "a-x",
+         "a-y"
+        ]
+       },
+       {
+        "code": "const one = curry((x) => x * 10); return one(4);",
+        "label": "hàm một tham số",
+        "expected": 40
        }
       ]
      }

@@ -66,7 +66,7 @@ async function runExercise(ex, code, opts = {}) {
     },
     runCode: (body, result) => {
       ctx.__result = result;
-      return vm.runInContext(`(async function (result) {\n${body}\n})(__result)`, ctx, { timeout: 10000 });
+      return vm.runInContext(`(async function (result) {\n${body}\n})(__result)`, ctx, { timeout: opts.syncTimeout || 10000 });
     },
     now: () => performance.now()
   };
@@ -81,6 +81,14 @@ async function main() {
   const modules = buildCurriculum();
   const current = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : '';
   if (current !== render(modules)) fail('js/content.generated.js đã cũ → chạy: npm run build');
+
+  // Chấm trên dữ liệu ĐÚNG NHƯ TRÌNH DUYỆT NHẬN (đọc lại file sinh ra), không phải object gốc trong bộ nhớ
+  const sandbox = { window: {} };
+  vm.runInNewContext(render(modules), sandbox);
+  const shipped = sandbox.window.CURRICULUM;
+  modules.forEach((m, i) => m.lessons.forEach((l, j) => l.exercises.forEach((ex, k) => {
+    ex.tests = shipped[i].lessons[j].exercises[k].tests;
+  })));
 
   console.log('2. Trùng id');
   const seen = new Set();

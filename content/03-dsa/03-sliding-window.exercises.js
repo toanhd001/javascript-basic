@@ -77,7 +77,7 @@ function lengthOfLongestSubstring(s) {
       { args: [''], expected: 0 },
       { args: ['abba'], expected: 2 },
       { args: [' '], expected: 1 },
-      { gen: 'let s = ""; for (let i = 0; i < 100000; i++) s += String.fromCharCode(33 + (i % 90)); return [s];', label: 'n = 100.000', expected: 90 }
+      { gen: 'const chars = []; for (let i = 0; i < 50000; i++) chars.push(String.fromCharCode(0x100 + i)); return [chars.join("") + chars.join("")];', label: 'n = 100.000, 50.000 ký tự khác nhau — vét cạn O(n²) sẽ quá thời gian', expected: 50000 }
     ]
   },
   {

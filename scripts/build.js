@@ -184,9 +184,31 @@ function buildCurriculum() {
   return modules;
 }
 
+// Giống JSON.stringify nhưng ra JS literal: giữ được undefined, NaN, ±Infinity, -0
+// (JSON đổi chúng thành null — làm sai các test kiểu `expected: [undefined]` hay `-Infinity`).
+function toJs(value, indent = '') {
+  if (value === undefined) return 'undefined';
+  if (typeof value === 'number') {
+    if (Number.isNaN(value)) return 'NaN';
+    if (value === Infinity) return 'Infinity';
+    if (value === -Infinity) return '-Infinity';
+    if (Object.is(value, -0)) return '-0';
+    return String(value);
+  }
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  const inner = indent + ' ';
+  if (Array.isArray(value)) {
+    if (!value.length) return '[]';
+    return '[\n' + value.map((v) => inner + toJs(v, inner)).join(',\n') + '\n' + indent + ']';
+  }
+  const keys = Object.keys(value);
+  if (!keys.length) return '{}';
+  return '{\n' + keys.map((k) => inner + JSON.stringify(k) + ': ' + toJs(value[k], inner)).join(',\n') + '\n' + indent + '}';
+}
+
 function render(modules) {
   return '/* FILE TỰ SINH bởi scripts/build.js — đừng sửa tay. Sửa trong content/ rồi chạy: npm run build */\n' +
-    'window.CURRICULUM = ' + JSON.stringify(modules, null, 1) + ';\n';
+    'window.CURRICULUM = ' + toJs(modules) + ';\n';
 }
 
 module.exports = { buildCurriculum, render, mdToHtml, OUT };

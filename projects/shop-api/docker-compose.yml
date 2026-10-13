@@ -1,0 +1,36 @@
+# Dev:   docker compose up -d db          → chỉ chạy Postgres, API chạy bằng `npm run dev` trên máy
+# Full:  docker compose up --build        → chạy cả Postgres và API trong container
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: shop
+      POSTGRES_DB: shop
+    ports:
+      - "${DB_PORT:-5432}:5432"          # máy bạn đã có Postgres chiếm 5432? đặt DB_PORT=5433
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # dữ liệu sống sót qua `docker compose down`
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shop -d shop"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  api:
+    build: .
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgres://shop:shop@db:5432/shop   # "db" = tên service, Docker tự phân giải
+      JWT_SECRET: doi-chuoi-bi-mat-nay-khi-deploy-that
+    ports:
+      - "${API_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy       # chờ Postgres sẵn sàng thật, không chỉ "đã khởi động"
+    profiles: ["full"]                   # chỉ chạy khi gọi: docker compose --profile full up
+
+volumes:
+  pgdata:

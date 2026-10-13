@@ -2,7 +2,7 @@
 
 Web học JavaScript có lộ trình, chạy code và chấm bài ngay trên trình duyệt (giống LeetCode/HackerRank nhưng bắt đầu từ cơ bản). Toàn bộ nội dung bằng tiếng Việt.
 
-- **42 bài học, 140 bài tập**, mỗi bài có test (gồm cả test ẩn với input lớn để kiểm tra độ phức tạp), gợi ý từng bước, lời giải kèm phân tích, và câu hỏi "Tại sao?" để đào sâu.
+- **46 bài học, 144 bài tập**, mỗi bài có test (gồm cả test ẩn với input lớn để kiểm tra độ phức tạp), gợi ý từng bước, lời giải kèm phân tích, và câu hỏi "Tại sao?" để đào sâu.
 - **Kiểm tra cú pháp** không cần chạy code, kèm cảnh báo các bẫy hay gặp trong coding test (`==`, `sort()` không comparator, `fill([])`, `Math.max(...arr)` với mảng lớn, `shift()` trong vòng lặp...).
 - Code chạy trong **Web Worker** có giới hạn thời gian: vòng lặp vô hạn hay thuật toán O(n²) với n lớn sẽ bị dừng và báo "quá thời gian" thay vì treo trình duyệt.
 - Lỗi được báo **đúng dòng** trong editor, kèm giải thích dễ hiểu.
@@ -31,6 +31,20 @@ npm start            # http://localhost:5173 — không cần npm install
 | 3. Cấu trúc dữ liệu & giải thuật | Hash map, two pointers, sliding window, prefix sum, stack/queue, linked list, đệ quy, binary search, sắp xếp, cây, heap, đồ thị, backtracking, quy hoạch động, tham lam |
 | 4. Phỏng vấn | Khung giải bài UMPIRE, bảng nhận diện pattern, kế hoạch ôn 8–12 tuần, câu hỏi JS (debounce, LRU cache, deep clone, curry) |
 | 5. Backend: API & Database | HTTP, thiết kế REST API, middleware/xác thực/rate limit, SQL (SELECT, JOIN, GROUP BY, ràng buộc, UPSERT), index & transaction, API + database (SQL injection, phân trang, N+1, transaction chuyển tiền), câu hỏi 기술면접 kèm thuật ngữ tiếng Hàn |
+| 6. Dự án thật | Docker, cấu trúc dự án backend, thư viện `pg` (kiểu dữ liệu, transaction, mã lỗi), và **6 nhiệm vụ** trên `projects/shop-api` |
+
+## Dự án thật: `projects/shop-api`
+
+API cửa hàng chạy bằng **Node.js 22 + Express 5 + PostgreSQL 16 + Docker Compose**, có test tự động trên database thật (kể cả test gửi request đồng thời để bắt lỗi bán vượt kho). Phần mẫu đã viết sẵn; 6 nhiệm vụ để bạn tự làm, có lời giải tham khảo trong `solutions/`. Xem [projects/shop-api/README.md](projects/shop-api/README.md).
+
+```bash
+cd projects/shop-api && npm install && docker compose up -d db && npm run migrate && npm run seed
+npm run task          # danh sách nhiệm vụ
+```
+
+## CI
+
+`.github/workflows/ci.yml` chạy trên mỗi lần push: `npm test` cho nội dung web, và với `projects/shop-api` — test phần mẫu + toàn bộ test với lời giải tham khảo trên PostgreSQL thật.
 
 ## Kế hoạch bổ sung
 

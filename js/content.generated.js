@@ -10756,5 +10756,435 @@ window.CURRICULUM = [
     "exercises": []
    }
   ]
+ },
+ {
+  "id": "real-project",
+  "title": "Dự án thật: Express + PostgreSQL + Docker",
+  "desc": "<p>Rời trình duyệt: chạy API thật bằng Node.js 22, Express 5, PostgreSQL 16 trong Docker, với test tự động. Project nằm ở <code>projects/shop-api</code> trong repo.</p>\n",
+  "lessons": [
+   {
+    "id": "rp-docker",
+    "title": "Docker cho lập trình viên backend",
+    "html": "<h2>Vấn đề Docker giải quyết</h2>\n<p>&quot;Máy em chạy được mà!&quot; — vì máy bạn có Postgres 16, máy đồng nghiệp có Postgres 13, server production lại cấu hình khác. Docker đóng gói <strong>ứng dụng + môi trường</strong> (hệ điều hành tối giản, runtime, thư viện) thành một <strong>image</strong> chạy giống nhau ở mọi nơi.</p>\n<table><thead><tr><th>Khái niệm</th><th>Giống như</th><th>Ví dụ</th></tr></thead>\n<tbody>\n<tr><td><strong>Image</strong></td><td>bản thiết kế, chỉ đọc</td><td><code>postgres:16-alpine</code>, image API bạn build</td></tr>\n<tr><td><strong>Container</strong></td><td>một lần chạy image (tiến trình cô lập)</td><td>container <code>shop-api-db-1</code></td></tr>\n<tr><td><strong>Volume</strong></td><td>ổ đĩa gắn ngoài, sống lâu hơn container</td><td>dữ liệu Postgres trong <code>pgdata</code></td></tr>\n<tr><td><strong>Port mapping</strong></td><td>nối cổng máy bạn vào cổng container</td><td><code>5432:5432</code></td></tr>\n<tr><td><strong>Network</strong></td><td>mạng riêng giữa các container</td><td>API gọi Postgres bằng hostname <code>db</code></td></tr>\n<tr><td><strong>Compose</strong></td><td>file khai báo cả hệ thống nhiều container</td><td><code>docker-compose.yml</code></td></tr>\n</tbody></table>\n<h2>Container ≠ máy ảo</h2>\n<p>Máy ảo (VM) chạy <strong>cả một hệ điều hành</strong> riêng (vài GB, khởi động hàng chục giây). Container dùng chung <strong>kernel</strong> của máy chủ, chỉ cô lập tiến trình, file system, mạng → nhẹ (vài chục MB) và khởi động trong mili-giây. Đổi lại, cô lập kém hơn VM.</p>\n<h2>Dockerfile — công thức build image</h2>\n<pre class=\"code\"><code class=\"language-text\">FROM node:22-alpine                 # bắt đầu từ image có sẵn Node 22 (Alpine Linux: rất nhỏ)\nWORKDIR /app\nENV NODE_ENV=production\nCOPY package.json package-lock.json ./\nRUN npm ci --omit=dev               # cài dependencies production\nCOPY src ./src                      # rồi mới copy source code\nUSER node                           # không chạy bằng root\nCMD [&quot;node&quot;, &quot;src/server.js&quot;]</code></pre>\n<p>Mỗi dòng tạo ra một <strong>layer</strong> được cache. Docker chỉ build lại từ layer đầu tiên bị thay đổi. Vì vậy copy <code>package.json</code> và chạy <code>npm ci</code> <strong>trước</strong> khi copy code: sửa code không làm cài lại <code>node_modules</code> (tiết kiệm hàng phút mỗi lần build).</p>\n<h2>docker-compose.yml của project</h2>\n<pre class=\"code\"><code class=\"language-text\">services:\n  db:\n    image: postgres:16-alpine\n    environment: { POSTGRES_USER: shop, POSTGRES_PASSWORD: shop, POSTGRES_DB: shop }\n    ports: [&quot;5432:5432&quot;]\n    volumes: [pgdata:/var/lib/postgresql/data]\n    healthcheck: { test: [&quot;CMD-SHELL&quot;, &quot;pg_isready -U shop -d shop&quot;] }\n  api:\n    build: .\n    environment: { DATABASE_URL: postgres://shop:shop@db:5432/shop }\n    depends_on: { db: { condition: service_healthy } }</code></pre>\n<ul><li>Trong mạng của compose, container API gọi database bằng <strong>tên service</strong> <code>db</code>, không phải <code>localhost</code> (<code>localhost</code> bên trong container là chính container đó!).</li><li><code>depends_on</code> + <code>service_healthy</code>: chờ Postgres <strong>sẵn sàng nhận kết nối</strong>, không chỉ &quot;đã khởi động tiến trình&quot;.</li><li>Không có volume, <code>docker compose down</code> sẽ <strong>xoá sạch dữ liệu</strong>.</li></ul>\n<h2>Lệnh hay dùng</h2>\n<table><thead><tr><th>Lệnh</th><th>Tác dụng</th></tr></thead>\n<tbody>\n<tr><td><code>docker compose up -d db</code></td><td>chạy service <code>db</code> ở chế độ nền</td></tr>\n<tr><td><code>docker compose ps</code> / <code>logs -f db</code></td><td>trạng thái / log</td></tr>\n<tr><td><code>docker compose exec db psql -U shop -d shop</code></td><td>chạy lệnh bên trong container</td></tr>\n<tr><td><code>docker compose down</code> / <code>down -v</code></td><td>dừng (giữ dữ liệu) / dừng và xoá dữ liệu</td></tr>\n<tr><td><code>docker build -t shop-api .</code></td><td>build image</td></tr>\n<tr><td><code>docker images</code> / <code>docker ps -a</code></td><td>liệt kê image / container</td></tr>\n</tbody></table>\n<h2>Dev workflow được khuyên dùng</h2>\n<p><strong>Database</strong> chạy trong Docker (giống production, dễ xoá làm lại), <strong>code</strong> chạy trực tiếp trên máy (<code>npm run dev</code>: sửa là thấy ngay, debug dễ). Chỉ khi muốn kiểm tra image production mới chạy cả API trong Docker.</p>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Tại sao image production nên chạy bằng user không phải <code>root</code>? Chuyện gì xảy ra nếu ứng dụng bị chiếm quyền?</li><li>Có nên chạy PostgreSQL production trong Docker không? So sánh với dịch vụ quản lý sẵn (AWS RDS, Naver Cloud DB...): ai lo backup, nâng cấp, failover?</li><li>Tại sao <code>.dockerignore</code> loại <code>node_modules</code> của máy bạn ra khỏi build? (Gợi ý: thư viện native biên dịch cho macOS/Windows không chạy trên Linux Alpine.)</li></ul>\n",
+    "source": "content/06-real-project/01-docker.md",
+    "snippetSchema": "",
+    "snippetHelpers": "",
+    "snippetNeedsSql": false,
+    "exercises": []
+   },
+   {
+    "id": "rp-structure",
+    "title": "Cấu trúc một dự án backend",
+    "html": "<h2>Chia lớp: routes → service → repository</h2>\n<pre class=\"code\"><code class=\"language-text\">HTTP request\n   │\n   ▼\nroutes      đọc req (params, query, body), gọi service, chọn status code, trả JSON\n   │\n   ▼\nservice     nghiệp vụ: kiểm tra quy tắc, điều phối nhiều bước, quản lý transaction\n   │\n   ▼\nrepository  CHỈ có SQL: findById, list, insert...\n   │\n   ▼\nPostgreSQL</code></pre>\n<p>Tại sao tách? Mỗi lớp <strong>một lý do để thay đổi</strong>: đổi định dạng response → chỉ sửa routes; đổi quy tắc giảm giá → service; tối ưu câu SQL → repository. Spring Boot bên Java dùng đúng mô hình này với tên <code>Controller → Service → Repository</code>.</p>\n<p>Đừng chia lớp máy móc: route chỉ đọc một sản phẩm thì gọi thẳng repository là đủ (project làm vậy với products). Thêm lớp khi có <strong>logic</strong> cần đặt ở đó.</p>\n<h2>Dependency injection: <code>createApp({ db, config })</code></h2>\n<pre class=\"code\"><code class=\"language-js\">// ❌ Khó test: module tự tạo kết nối tới database thật lúc import\nimport { pool } from './db.js';\n\n// ✅ Nhận phụ thuộc từ bên ngoài\nexport function createApp({ db, config }) { /* ... */ }\n\n// server.js:  createApp({ db: createDb(process.env.DATABASE_URL), config })\n// test:       createApp({ db: createDb(TEST_DATABASE_URL), config: testConfig })</code></pre>\n<p>Test truyền database test; production truyền database thật; code ứng dụng không cần biết.</p>\n<h2>Cấu hình qua biến môi trường (12-factor)</h2>\n<ul><li>Cùng một image chạy ở dev / staging / production, chỉ khác <strong>biến môi trường</strong> (<code>DATABASE_URL</code>, <code>JWT_SECRET</code>...).</li><li><strong>Không</strong> commit secret vào git. <code>.env</code> nằm trong <code>.gitignore</code>; chỉ commit <code>.env.example</code>.</li><li><strong>Fail fast</strong>: kiểm tra cấu hình ngay khi khởi động và dừng với thông báo rõ ràng, thay vì chạy được nửa ngày rồi lỗi khi request đầu tiên cần <code>JWT_SECRET</code>.</li></ul>\n<h2>Xử lý lỗi một chỗ</h2>\n<p>Service ném lỗi có ý nghĩa (<code>throw notFound('Product not found')</code>), error middleware dịch thành response. Express 5 tự chuyển lỗi của handler <code>async</code> tới error middleware (Express 4 thì không — phải bọc <code>try/catch</code> hoặc dùng thư viện).</p>\n<h2>Graceful shutdown</h2>\n<p>Khi deploy phiên bản mới, Docker/Kubernetes gửi <code>SIGTERM</code>. Server tốt sẽ: ngừng nhận request mới → chờ request đang xử lý xong → đóng pool database → thoát. Không làm vậy, người dùng đang đặt hàng giữa chừng sẽ nhận lỗi.</p>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Đặt logic transaction ở service hay repository? Nếu một nghiệp vụ cần ghi vào hai repository (orders và products) thì sao?</li><li><code>config.js</code> của project cho phép <code>JWT_SECRET</code> mặc định khi dev nhưng bắt buộc khi production. Trade-off của việc có giá trị mặc định là gì?</li></ul>\n",
+    "source": "content/06-real-project/02-project-structure.md",
+    "snippetSchema": "",
+    "snippetHelpers": "",
+    "snippetNeedsSql": false,
+    "exercises": [
+     {
+      "id": "rp-load-config",
+      "title": "Đọc và kiểm tra cấu hình",
+      "difficulty": "medium",
+      "prompt": "<p>Viết <code>loadConfig(env)</code> (<code>env</code> là object giống <code>process.env</code>: mọi giá trị là <strong>chuỗi</strong>) trả về:</p>\n<pre class=\"code\"><code class=\"language-js\">{ nodeEnv, port, databaseUrl, jwtSecret }</code></pre>\n<ul><li><code>nodeEnv</code>: <code>env.NODE_ENV</code>, mặc định <code>&quot;development&quot;</code>.</li><li><code>port</code>: số nguyên từ <code>env.PORT</code> (mặc định <code>3000</code>), phải trong khoảng 1–65535.</li><li><code>databaseUrl</code>: <strong>bắt buộc</strong>, phải bắt đầu bằng <code>&quot;postgres://&quot;</code> hoặc <code>&quot;postgresql://&quot;</code>.</li><li><code>jwtSecret</code>: production (<code>nodeEnv === &quot;production&quot;</code>) thì <strong>bắt buộc</strong> và dài ≥ 16 ký tự; môi trường khác mặc định <code>&quot;dev-secret&quot;</code>.</li></ul>\n<p>Sai thì <code>throw new Error(...)</code> với thông điệp liệt kê <strong>tất cả</strong> vấn đề, mỗi vấn đề một dòng bắt đầu bằng <code>&quot;- &quot;</code>, theo thứ tự PORT → DATABASE_URL → JWT_SECRET:</p>\n<pre class=\"code\"><code class=\"language-text\">Invalid configuration:\n- PORT must be an integer 1-65535\n- DATABASE_URL is required</code></pre>\n<p>Các thông điệp: <code>PORT must be an integer 1-65535</code>, <code>DATABASE_URL is required</code>, <code>DATABASE_URL must start with postgres://</code>, <code>JWT_SECRET must be at least 16 characters in production</code>.</p>\n",
+      "fn": "loadConfig",
+      "starter": "function loadConfig(env) {\n\n}\n",
+      "solution": "function loadConfig(env) {\n  const nodeEnv = env.NODE_ENV || \"development\";\n  const problems = [];\n\n  const portText = env.PORT ?? \"3000\";\n  const port = Number(portText);\n  if (!/^\\d+$/.test(portText) || port < 1 || port > 65535) problems.push(\"PORT must be an integer 1-65535\");\n\n  const databaseUrl = env.DATABASE_URL;\n  if (!databaseUrl) problems.push(\"DATABASE_URL is required\");\n  else if (!/^postgres(ql)?:\\/\\//.test(databaseUrl)) problems.push(\"DATABASE_URL must start with postgres://\");\n\n  let jwtSecret = env.JWT_SECRET;\n  if (nodeEnv === \"production\") {\n    if (!jwtSecret || jwtSecret.length < 16) problems.push(\"JWT_SECRET must be at least 16 characters in production\");\n  } else if (!jwtSecret) {\n    jwtSecret = \"dev-secret\";\n  }\n\n  if (problems.length) throw new Error(\"Invalid configuration:\\n- \" + problems.join(\"\\n- \"));\n  return { nodeEnv, port, databaseUrl, jwtSecret };\n}\n",
+      "explain": "<p>Fail fast + báo <strong>tất cả</strong> lỗi cùng lúc giúp deploy sai cấu hình bị phát hiện ngay ở bước khởi động (container crash, CI đỏ), thay vì âm thầm chạy với giá trị sai. Thư viện như <code>zod</code> / <code>envalid</code> làm việc này gọn hơn trong dự án thật.</p>\n",
+      "hints": [
+       "<p>Gom lỗi vào mảng <code>problems</code> thay vì <code>throw</code> ngay ở lỗi đầu tiên — người vận hành sửa hết một lần.</p>\n",
+       "<p><code>Number(&quot;&quot;)</code> là <code>0</code> và <code>Number(&quot;3000abc&quot;)</code> là <code>NaN</code>: kiểm tra chuỗi bằng regex <code>/^\\d+$/</code> trước.</p>\n",
+       "<p>Cuối cùng: <code>throw new Error(&quot;Invalid configuration:\\n- &quot; + problems.join(&quot;\\n- &quot;))</code>.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "kind": "js",
+      "schema": "",
+      "needsSql": false,
+      "tests": [
+       {
+        "code": "return loadConfig({ DATABASE_URL: \"postgres://u:p@localhost:5432/shop\" });",
+        "label": "chỉ có DATABASE_URL → dùng mặc định",
+        "expected": {
+         "nodeEnv": "development",
+         "port": 3000,
+         "databaseUrl": "postgres://u:p@localhost:5432/shop",
+         "jwtSecret": "dev-secret"
+        }
+       },
+       {
+        "code": "return loadConfig({ NODE_ENV: \"production\", PORT: \"8080\", DATABASE_URL: \"postgresql://db/shop\", JWT_SECRET: \"a-very-long-secret-123\" });",
+        "label": "production đầy đủ",
+        "expected": {
+         "nodeEnv": "production",
+         "port": 8080,
+         "databaseUrl": "postgresql://db/shop",
+         "jwtSecret": "a-very-long-secret-123"
+        }
+       },
+       {
+        "code": "try { loadConfig({ PORT: \"abc\" }); return \"không ném lỗi\"; } catch (e) { return e.message; }",
+        "label": "PORT sai + thiếu DATABASE_URL → báo cả hai",
+        "expected": "Invalid configuration:\n- PORT must be an integer 1-65535\n- DATABASE_URL is required"
+       },
+       {
+        "code": "try { loadConfig({ NODE_ENV: \"production\", DATABASE_URL: \"mysql://x\", JWT_SECRET: \"short\" }); return \"không ném lỗi\"; } catch (e) { return e.message; }",
+        "label": "production: URL sai loại + secret ngắn",
+        "expected": "Invalid configuration:\n- DATABASE_URL must start with postgres://\n- JWT_SECRET must be at least 16 characters in production"
+       },
+       {
+        "code": "try { loadConfig({ PORT: \"70000\", DATABASE_URL: \"postgres://x\" }); return \"không ném lỗi\"; } catch (e) { return e.message; }",
+        "label": "PORT ngoài khoảng",
+        "expected": "Invalid configuration:\n- PORT must be an integer 1-65535"
+       },
+       {
+        "code": "try { loadConfig({ PORT: \"\", DATABASE_URL: \"postgres://x\" }); return \"không ném lỗi\"; } catch (e) { return e.message; }",
+        "label": "PORT rỗng",
+        "expected": "Invalid configuration:\n- PORT must be an integer 1-65535"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "rp-node-postgres",
+    "title": "Node.js + PostgreSQL với thư viện pg",
+    "html": "<h2>Pool và truy vấn</h2>\n<pre class=\"code\"><code class=\"language-js\">import pg from 'pg';\nconst pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 10 });\n\nconst { rows, rowCount } = await pool.query(\n  'SELECT id, name, price FROM products WHERE category = $1 AND price &lt;= $2',\n  ['books', 50000]\n);</code></pre>\n<ul><li>PostgreSQL dùng placeholder <strong>đánh số</strong> <code>$1, $2, ...</code> (MySQL/SQLite dùng <code>?</code>). Cùng một giá trị dùng hai lần thì viết lại <code>$1</code> hai lần.</li><li>Placeholder chỉ thay được <strong>giá trị</strong> — không thay được tên bảng, tên cột, <code>ASC/DESC</code>. Những thứ đó phải lấy từ <strong>whitelist</strong> trong code.</li></ul>\n<h2>Bẫy kiểu dữ liệu</h2>\n<pre class=\"code\"><code class=\"language-js\">const { rows } = await pool.query('SELECT COUNT(*) AS n, SUM(price) AS s FROM products');\nconsole.log(rows[0]);   // { n: '10', s: '3008000' }  ← CHUỖI!</code></pre>\n<table><thead><tr><th>Kiểu Postgres</th><th>pg trả về</th><th>Lý do / cách xử lý</th></tr></thead>\n<tbody>\n<tr><td><code>integer</code></td><td>number</td><td>an toàn</td></tr>\n<tr><td><code>bigint</code> (COUNT, SUM của integer, BIGSERIAL)</td><td><strong>string</strong></td><td>có thể vượt 2^53 → pg không dám đổi thành number. Ép <code>COUNT(*)::int</code> nếu chắc chắn nhỏ</td></tr>\n<tr><td><code>numeric</code> / <code>decimal</code> (tiền tệ)</td><td><strong>string</strong></td><td>giữ chính xác tuyệt đối; dùng thư viện số thập phân nếu cần tính</td></tr>\n<tr><td><code>timestamptz</code></td><td><code>Date</code></td><td><code>JSON.stringify</code> thành chuỗi ISO UTC</td></tr>\n<tr><td><code>json</code> / <code>jsonb</code></td><td>object</td><td></td></tr>\n<tr><td>mảng <code>integer[]</code></td><td>mảng JS</td><td>truyền mảng làm tham số được: <code>WHERE id = ANY($1)</code></td></tr>\n</tbody></table>\n<h2>Transaction phải dùng MỘT kết nối</h2>\n<p>Bug kinh điển:</p>\n<pre class=\"code\"><code class=\"language-js\">// ❌ SAI: pool.query mỗi lần có thể lấy một kết nối KHÁC → BEGIN, UPDATE, COMMIT nằm ở 3 kết nối khác nhau\nawait pool.query('BEGIN');\nawait pool.query('UPDATE ...');\nawait pool.query('COMMIT');\n\n// ✅ ĐÚNG: mượn một client, làm hết trên client đó, luôn trả lại\nconst client = await pool.connect();\ntry {\n  await client.query('BEGIN');\n  await client.query('UPDATE ...');\n  await client.query('COMMIT');\n} catch (err) {\n  await client.query('ROLLBACK');\n  throw err;\n} finally {\n  client.release();          // quên dòng này → pool cạn dần → cả API treo\n}</code></pre>\n<p>Project gói đoạn trên thành <code>db.transaction(async (tx) =&gt; { ... })</code> — bên trong <strong>phải</strong> dùng <code>tx.query</code>, không phải <code>db.query</code>.</p>\n<h2>Đồng thời: kiểm tra và ghi trong cùng một câu lệnh</h2>\n<pre class=\"code\"><code class=\"language-sql\">-- Trừ kho an toàn: điều kiện và thao tác ghi là MỘT câu lệnh nguyên tử\nUPDATE products SET stock = stock - $1\nWHERE id = $2 AND stock &gt;= $1\nRETURNING name, price;        -- 0 dòng trả về = không đủ hàng (hoặc không tồn tại)</code></pre>\n<p>Postgres khoá dòng khi <code>UPDATE</code>; request thứ hai phải chờ, rồi đánh giá lại <code>stock &gt;= $1</code> trên giá trị <strong>mới</strong>. Trong project, test gửi 5 request mua đồng thời sản phẩm còn 3 cái: cách &quot;SELECT rồi UPDATE&quot; để cả 5 thành công; cách trên cho đúng 3.</p>\n<p>Khi cần đọc rồi quyết định phức tạp hơn: <code>SELECT ... FOR UPDATE</code> khoá dòng tới hết transaction (xem <code>cancelOrder</code> trong project).</p>\n<h2>Mã lỗi Postgres</h2>\n<p>Lỗi từ database có thuộc tính <code>code</code> (5 ký tự). Vài mã hay gặp:</p>\n<table><thead><tr><th>code</th><th>Tên</th><th>Thường dịch thành</th></tr></thead>\n<tbody>\n<tr><td><code>23505</code></td><td>unique_violation</td><td>409 Conflict (email đã tồn tại)</td></tr>\n<tr><td><code>23503</code></td><td>foreign_key_violation</td><td>409 / 400 (tham chiếu tới dòng không tồn tại, hoặc xoá dòng đang được tham chiếu)</td></tr>\n<tr><td><code>23502</code></td><td>not_null_violation</td><td>400</td></tr>\n<tr><td><code>23514</code></td><td>check_violation</td><td>400</td></tr>\n<tr><td><code>22P02</code></td><td>invalid_text_representation</td><td>400 (VD <code>'abc'</code> cho cột integer)</td></tr>\n<tr><td><code>40P01</code></td><td>deadlock_detected</td><td>thử lại transaction</td></tr>\n<tr><td><code>40001</code></td><td>serialization_failure</td><td>thử lại transaction (mức SERIALIZABLE)</td></tr>\n</tbody></table>\n<h2>Câu hỏi tại sao</h2>\n<ul><li>Tại sao pg không tự đổi <code>bigint</code> thành <code>number</code>? Nếu bạn tự cấu hình cho nó đổi, rủi ro là gì?</li><li>Pool <code>max: 10</code> mà có 100 request đồng thời thì sao? Tăng lên <code>max: 500</code> có giải quyết được không? (Gợi ý: giới hạn <code>max_connections</code> của Postgres, mỗi kết nối tốn RAM ở server.)</li><li>Lỗi <code>40P01</code> (deadlock) thì &quot;thử lại&quot; là hợp lý, còn <code>23505</code> thì không. Tại sao?</li></ul>\n",
+    "source": "content/06-real-project/03-node-postgres.md",
+    "snippetSchema": "",
+    "snippetHelpers": "",
+    "snippetNeedsSql": false,
+    "exercises": [
+     {
+      "id": "rp-build-where",
+      "title": "Xây WHERE động với $1, $2...",
+      "difficulty": "medium",
+      "prompt": "<p>Viết <code>buildProductFilter(filters)</code> trả về <code>{ where, values }</code> để ghép vào câu SQL của PostgreSQL. <code>filters</code> có thể có (bỏ qua các trường <code>undefined</code>):</p>\n<table><thead><tr><th>Trường</th><th>Điều kiện sinh ra</th></tr></thead>\n<tbody>\n<tr><td><code>category</code></td><td><code>category = $n</code></td></tr>\n<tr><td><code>minPrice</code></td><td><code>price &gt;= $n</code></td></tr>\n<tr><td><code>maxPrice</code></td><td><code>price &lt;= $n</code></td></tr>\n<tr><td><code>q</code></td><td><code>name ILIKE $n</code> với giá trị <code>'%' + q + '%'</code></td></tr>\n<tr><td><code>ids</code> (mảng)</td><td><code>id = ANY($n)</code> với giá trị là <strong>cả mảng</strong></td></tr>\n</tbody></table>\n<p>Các điều kiện theo <strong>đúng thứ tự trong bảng</strong>, nối bằng <code>&quot; AND &quot;</code>, có tiền tố <code>&quot;WHERE &quot;</code>. Không có điều kiện nào → <code>where</code> là chuỗi rỗng.</p>\n<pre class=\"code\"><code class=\"language-js\">buildProductFilter({ maxPrice: 50000, category: &quot;books&quot; })\n// { where: &quot;WHERE category = $1 AND price &lt;= $2&quot;, values: [&quot;books&quot;, 50000] }</code></pre>\n",
+      "fn": "buildProductFilter",
+      "starter": "function buildProductFilter(filters) {\n  const conditions = [];\n  const values = [];\n\n  return { where: \"\", values };\n}\n",
+      "solution": "function buildProductFilter(filters) {\n  const conditions = [];\n  const values = [];\n  const add = (sql, value) => {\n    values.push(value);\n    conditions.push(sql.replace(\"?\", \"$\" + values.length));\n  };\n  if (filters.category !== undefined) add(\"category = ?\", filters.category);\n  if (filters.minPrice !== undefined) add(\"price >= ?\", filters.minPrice);\n  if (filters.maxPrice !== undefined) add(\"price <= ?\", filters.maxPrice);\n  if (filters.q !== undefined) add(\"name ILIKE ?\", \"%\" + filters.q + \"%\");\n  if (filters.ids !== undefined) add(\"id = ANY(?)\", filters.ids);\n  return { where: conditions.length ? \"WHERE \" + conditions.join(\" AND \") : \"\", values };\n}\n",
+      "explain": "<p>Đây chính là phần khó nhất của Nhiệm vụ 2 trong project. Thư viện query builder (Knex, Kysely) hay ORM làm việc này cho bạn — nhưng khi đọc log SQL chậm hoặc debug lỗi &quot;bind message supplies 3 parameters, but prepared statement requires 2&quot;, bạn cần hiểu nó hoạt động thế nào.</p>\n",
+      "hints": [
+       "<p>Số thứ tự placeholder = độ dài mảng <code>values</code> <strong>sau khi</strong> push giá trị.</p>\n",
+       "<p>Viết một hàm phụ <code>add(sqlCoDauHoi, giaTri)</code> để khỏi lặp lại việc đếm.</p>\n",
+       "<p>Kiểm tra <code>!== undefined</code> chứ không phải truthy: <code>minPrice: 0</code> là một bộ lọc hợp lệ!</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "kind": "js",
+      "schema": "",
+      "needsSql": false,
+      "tests": [
+       {
+        "args": [
+         {
+          "maxPrice": 50000,
+          "category": "books"
+         }
+        ],
+        "expected": {
+         "where": "WHERE category = $1 AND price <= $2",
+         "values": [
+          "books",
+          50000
+         ]
+        }
+       },
+       {
+        "args": [
+         {}
+        ],
+        "expected": {
+         "where": "",
+         "values": []
+        }
+       },
+       {
+        "args": [
+         {
+          "minPrice": 0
+         }
+        ],
+        "expected": {
+         "where": "WHERE price >= $1",
+         "values": [
+          0
+         ]
+        },
+        "label": "minPrice = 0 vẫn là bộ lọc"
+       },
+       {
+        "args": [
+         {
+          "q": "pro",
+          "ids": [
+           1,
+           3,
+           5
+          ]
+         }
+        ],
+        "expected": {
+         "where": "WHERE name ILIKE $1 AND id = ANY($2)",
+         "values": [
+          "%pro%",
+          [
+           1,
+           3,
+           5
+          ]
+         ]
+        }
+       },
+       {
+        "args": [
+         {
+          "category": "electronics",
+          "minPrice": 10000,
+          "maxPrice": 200000,
+          "q": "key",
+          "ids": [
+           3
+          ]
+         }
+        ],
+        "expected": {
+         "where": "WHERE category = $1 AND price >= $2 AND price <= $3 AND name ILIKE $4 AND id = ANY($5)",
+         "values": [
+          "electronics",
+          10000,
+          200000,
+          "%key%",
+          [
+           3
+          ]
+         ]
+        }
+       },
+       {
+        "args": [
+         {
+          "category": "x' OR '1'='1"
+         }
+        ],
+        "expected": {
+         "where": "WHERE category = $1",
+         "values": [
+          "x' OR '1'='1"
+         ]
+        },
+        "label": "chuỗi tấn công chỉ nằm trong values"
+       }
+      ]
+     },
+     {
+      "id": "rp-insert-many",
+      "title": "INSERT nhiều dòng trong một câu lệnh",
+      "difficulty": "medium",
+      "prompt": "<p>Viết <code>insertMany(table, columns, rows)</code> trả về <code>{ text, values }</code> cho <strong>một</strong> câu INSERT nhiều dòng (nhanh hơn N câu INSERT riêng lẻ: một lượt đi-về mạng thay vì N):</p>\n<pre class=\"code\"><code class=\"language-js\">insertMany(&quot;order_items&quot;, [&quot;order_id&quot;, &quot;product_id&quot;, &quot;quantity&quot;], [[7, 1, 2], [7, 5, 1]])\n// {\n//   text: &quot;INSERT INTO order_items (order_id, product_id, quantity) VALUES ($1, $2, $3), ($4, $5, $6)&quot;,\n//   values: [7, 1, 2, 7, 5, 1]\n// }</code></pre>\n<p><code>table</code> và <code>columns</code> chỉ được chứa chữ thường, số và <code>_</code> (bắt đầu bằng chữ) — sai thì <code>throw new Error(&quot;Invalid identifier: &lt;tên&gt;&quot;)</code> (vì chúng bị ghép thẳng vào SQL, không đi qua placeholder). <code>rows</code> rỗng → <code>throw new Error(&quot;No rows&quot;)</code>. Mỗi dòng phải có đúng số cột → <code>throw new Error(&quot;Row 1 has 2 values, expected 3&quot;)</code> (chỉ số bắt đầu từ 0).</p>\n",
+      "fn": "insertMany",
+      "starter": "function insertMany(table, columns, rows) {\n\n}\n",
+      "solution": "function insertMany(table, columns, rows) {\n  for (const name of [table, ...columns]) {\n    if (!/^[a-z][a-z0-9_]*$/.test(name)) throw new Error(\"Invalid identifier: \" + name);\n  }\n  if (rows.length === 0) throw new Error(\"No rows\");\n  const values = [];\n  const tuples = rows.map((row, i) => {\n    if (row.length !== columns.length) {\n      throw new Error(\"Row \" + i + \" has \" + row.length + \" values, expected \" + columns.length);\n    }\n    const placeholders = row.map((value) => {\n      values.push(value);\n      return \"$\" + values.length;\n    });\n    return \"(\" + placeholders.join(\", \") + \")\";\n  });\n  return {\n    text: \"INSERT INTO \" + table + \" (\" + columns.join(\", \") + \") VALUES \" + tuples.join(\", \"),\n    values\n  };\n}\n",
+      "explain": "<p>Postgres giới hạn 65.535 tham số mỗi câu lệnh — chèn hàng trăm nghìn dòng thì chia thành từng lô (batch), hoặc dùng <code>COPY</code> (nhanh nhất). Lời giải Nhiệm vụ 4 trong project dùng đúng kỹ thuật này cho <code>order_items</code>.</p>\n",
+      "hints": [
+       "<p>Duyệt từng dòng, từng giá trị: push vào <code>values</code>, placeholder là <code>&quot;$&quot; + values.length</code>.</p>\n",
+       "<p>Kiểm tra tên bảng/cột bằng regex <code>/^[a-z][a-z0-9_]*$/</code> trước tiên.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "kind": "js",
+      "schema": "",
+      "needsSql": false,
+      "tests": [
+       {
+        "args": [
+         "order_items",
+         [
+          "order_id",
+          "product_id",
+          "quantity"
+         ],
+         [
+          [
+           7,
+           1,
+           2
+          ],
+          [
+           7,
+           5,
+           1
+          ]
+         ]
+        ],
+        "expected": {
+         "text": "INSERT INTO order_items (order_id, product_id, quantity) VALUES ($1, $2, $3), ($4, $5, $6)",
+         "values": [
+          7,
+          1,
+          2,
+          7,
+          5,
+          1
+         ]
+        }
+       },
+       {
+        "args": [
+         "tags",
+         [
+          "name"
+         ],
+         [
+          [
+           "sale"
+          ]
+         ]
+        ],
+        "expected": {
+         "text": "INSERT INTO tags (name) VALUES ($1)",
+         "values": [
+          "sale"
+         ]
+        }
+       },
+       {
+        "code": "try { insertMany(\"users; DROP TABLE users\", [\"id\"], [[1]]); return \"không ném lỗi\"; } catch (e) { return e.message; }",
+        "label": "tên bảng chứa SQL độc",
+        "expected": "Invalid identifier: users; DROP TABLE users"
+       },
+       {
+        "code": "try { insertMany(\"t\", [\"a\", \"Bad-Col\"], [[1, 2]]); return \"không ném lỗi\"; } catch (e) { return e.message; }",
+        "label": "tên cột không hợp lệ",
+        "expected": "Invalid identifier: Bad-Col"
+       },
+       {
+        "code": "try { insertMany(\"t\", [\"a\"], []); return \"không ném lỗi\"; } catch (e) { return e.message; }",
+        "label": "không có dòng nào",
+        "expected": "No rows"
+       },
+       {
+        "code": "try { insertMany(\"t\", [\"a\", \"b\", \"c\"], [[1, 2, 3], [4, 5]]); return \"không ném lỗi\"; } catch (e) { return e.message; }",
+        "label": "dòng thiếu giá trị",
+        "expected": "Row 1 has 2 values, expected 3"
+       }
+      ]
+     },
+     {
+      "id": "rp-pg-error",
+      "title": "Dịch lỗi PostgreSQL thành HTTP",
+      "difficulty": "easy",
+      "prompt": "<p>Viết <code>pgErrorToHttp(err)</code> nhận một lỗi (object có thể có <code>code</code>, <code>constraint</code>) và trả về <code>{ status, error }</code>:</p>\n<table><thead><tr><th>err.code</th><th>status</th><th>error</th></tr></thead>\n<tbody>\n<tr><td><code>23505</code></td><td>409</td><td><code>&quot;Duplicate value&quot;</code> — riêng khi <code>err.constraint === &quot;users_email_key&quot;</code> thì <code>&quot;Email already registered&quot;</code></td></tr>\n<tr><td><code>23503</code></td><td>409</td><td><code>&quot;Related resource missing or in use&quot;</code></td></tr>\n<tr><td><code>23502</code>, <code>23514</code>, <code>22P02</code></td><td>400</td><td><code>&quot;Invalid input&quot;</code></td></tr>\n<tr><td><code>40P01</code>, <code>40001</code></td><td>503</td><td><code>&quot;Please retry&quot;</code></td></tr>\n<tr><td>khác (kể cả không có code)</td><td>500</td><td><code>&quot;Internal Server Error&quot;</code></td></tr>\n</tbody></table>\n",
+      "fn": "pgErrorToHttp",
+      "starter": "function pgErrorToHttp(err) {\n  return { status: 500, error: err.message };\n}\n",
+      "solution": "function pgErrorToHttp(err) {\n  switch (err && err.code) {\n    case \"23505\":\n      return { status: 409, error: err.constraint === \"users_email_key\" ? \"Email already registered\" : \"Duplicate value\" };\n    case \"23503\":\n      return { status: 409, error: \"Related resource missing or in use\" };\n    case \"23502\":\n    case \"23514\":\n    case \"22P02\":\n      return { status: 400, error: \"Invalid input\" };\n    case \"40P01\":\n    case \"40001\":\n      return { status: 503, error: \"Please retry\" };\n    default:\n      return { status: 500, error: \"Internal Server Error\" };\n  }\n}\n",
+      "explain": "<p>Tên ràng buộc (<code>users_email_key</code>) do Postgres tự đặt theo mẫu <code>&lt;bảng&gt;_&lt;cột&gt;_key</code> khi khai báo <code>UNIQUE</code> trên cột. Dựa vào tên ràng buộc để chọn thông điệp thân thiện là kỹ thuật phổ biến — nên đặt tên ràng buộc tường minh trong migration để không phụ thuộc quy ước tự đặt.</p>\n",
+      "hints": [
+       "<p><code>switch (err.code)</code> với nhiều <code>case</code> dùng chung một nhánh.</p>\n",
+       "<p>Code có sẵn để lộ <code>err.message</code> của database ra ngoài — đừng làm vậy với lỗi 500.</p>\n"
+      ],
+      "followUp": "",
+      "helpers": "",
+      "compare": null,
+      "timeout": null,
+      "brokenStarter": false,
+      "kind": "js",
+      "schema": "",
+      "needsSql": false,
+      "tests": [
+       {
+        "args": [
+         {
+          "code": "23505",
+          "constraint": "users_email_key",
+          "message": "duplicate key value violates unique constraint \"users_email_key\""
+         }
+        ],
+        "expected": {
+         "status": 409,
+         "error": "Email already registered"
+        }
+       },
+       {
+        "args": [
+         {
+          "code": "23505",
+          "constraint": "tags_name_key"
+         }
+        ],
+        "expected": {
+         "status": 409,
+         "error": "Duplicate value"
+        }
+       },
+       {
+        "args": [
+         {
+          "code": "23503"
+         }
+        ],
+        "expected": {
+         "status": 409,
+         "error": "Related resource missing or in use"
+        }
+       },
+       {
+        "args": [
+         {
+          "code": "22P02",
+          "message": "invalid input syntax for type integer: \"abc\""
+         }
+        ],
+        "expected": {
+         "status": 400,
+         "error": "Invalid input"
+        }
+       },
+       {
+        "args": [
+         {
+          "code": "40P01"
+         }
+        ],
+        "expected": {
+         "status": 503,
+         "error": "Please retry"
+        }
+       },
+       {
+        "args": [
+         {
+          "message": "connect ECONNREFUSED 127.0.0.1:5432"
+         }
+        ],
+        "expected": {
+         "status": 500,
+         "error": "Internal Server Error"
+        },
+        "label": "lỗi kết nối: không lộ địa chỉ database"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "rp-tasks",
+    "title": "Làm 6 nhiệm vụ của shop-api",
+    "html": "<p>Đây là phần <strong>thực hành chính</strong> của chặng: code chạy trên máy bạn, với PostgreSQL thật. Hướng dẫn chi tiết, sơ đồ thư mục và cách xử lý lỗi nằm trong <code>projects/shop-api/README.md</code>.</p>\n<h2>1. Chuẩn bị (một lần)</h2>\n<pre class=\"code\"><code class=\"language-bash\">cd projects/shop-api\nnpm install\ndocker compose up -d db\nnpm run migrate\nnpm run seed\nnpm test            # 19 test &quot;phần mẫu&quot; phải qua; các test nhiệm vụ trượt — bình thường</code></pre>\n<h2>2. Vòng lặp làm một nhiệm vụ</h2>\n<ol><li><code>npm run task</code> để xem danh sách, đọc <strong>comment hướng dẫn</strong> ngay trên dòng <code>throw notImplemented('NHIỆM VỤ n ...')</code>.</li><li>Đọc code <strong>MẪU</strong> gần đó (<code>register</code>, <code>products.create</code>, <code>cancelOrder</code>) — chúng dùng đúng các kỹ thuật bạn cần.</li><li>Viết code. Chạy <code>npm run dev</code> và thử bằng <code>curl</code> / Postman nếu muốn xem tận mắt.</li><li><code>npm run task -- n</code> cho đến khi tất cả test của nhiệm vụ đó qua.</li><li><code>npm test</code> để chắc không làm hỏng phần khác.</li><li>Mở <code>solutions/</code> để <strong>so sánh</strong> (không phải để chép), rồi trả lời câu &quot;tại sao&quot; bên dưới.</li></ol>\n<h2>3. Đọc kết quả test</h2>\n<pre class=\"code\"><code class=\"language-text\">not ok 6 - 5 request ĐỒNG THỜI mua sản phẩm chỉ còn 3 cái → đúng 3 thành công, kho về 0\n  error: |-\n    Expected values to be strictly deep-equal:\n    + actual - expected\n      [ 201, 201, 201,\n    +   201,\n    +   201\n    -   409,\n    -   409 ]</code></pre>\n<p>Dòng <code>+</code> là <strong>thực tế</strong> code của bạn trả về, <code>-</code> là <strong>mong đợi</strong>. Ở ví dụ trên: 5 đơn đều thành công trong khi kho chỉ có 3 → bán vượt.</p>\n<h2>4. Debug với database</h2>\n<pre class=\"code\"><code class=\"language-bash\">docker compose exec db psql -U shop -d shop</code></pre>\n<pre class=\"code\"><code class=\"language-sql\">SELECT id, name, stock FROM products ORDER BY id;\nEXPLAIN SELECT * FROM orders WHERE user_id = 1;   -- Nhiệm vụ 6\nSELECT * FROM schema_migrations;                  -- migration nào đã chạy</code></pre>\n<p>Muốn làm lại dữ liệu sạch: <code>npm run seed</code>. Test dùng database riêng <code>shop_test</code> và tự dựng lại từ đầu mỗi lần, nên không ảnh hưởng dữ liệu dev.</p>\n<h2>5. Sáu nhiệm vụ</h2>\n<table><thead><tr><th>#</th><th>Việc</th><th>Học được</th><th>Câu hỏi tại sao</th></tr></thead>\n<tbody>\n<tr><td>1</td><td><code>GET /products/:id</code></td><td>placeholder <code>$1</code>, 400 vs 404</td><td>Tại sao <code>/products/abc</code> là 400 mà không phải 404?</td></tr>\n<tr><td>2</td><td><code>GET /products</code> lọc + sắp xếp + phân trang</td><td>WHERE động, whitelist ORDER BY, escape LIKE</td><td>Tại sao <code>sort</code> không truyền qua placeholder được?</td></tr>\n<tr><td>3</td><td><code>POST /auth/login</code></td><td>so mật khẩu băm, cấp JWT</td><td>Tại sao &quot;sai email&quot; và &quot;sai mật khẩu&quot; phải trả cùng một thông báo?</td></tr>\n<tr><td>4</td><td><code>POST /orders</code></td><td>transaction, trừ kho nguyên tử, tránh deadlock</td><td>Tại sao xử lý item theo <code>productId</code> tăng dần lại tránh được deadlock?</td></tr>\n<tr><td>5</td><td><code>GET /me/orders</code></td><td>sửa N+1, <code>= ANY($1)</code></td><td>Khi nào JOIN một lần tốt hơn hai truy vấn, và ngược lại?</td></tr>\n<tr><td>6</td><td>Migration tạo index</td><td>migration, <code>EXPLAIN</code></td><td>Tại sao test phải tắt <code>enable_seqscan</code> mới thấy index được dùng?</td></tr>\n</tbody></table>\n<p>Gợi ý thứ tự: <strong>1 → 2 → 3 → 5 → 6 → 4</strong>. Nhiệm vụ 4 khó nhất vì lỗi của nó chỉ lộ ra khi có nhiều request <strong>cùng lúc</strong> — test đã mô phỏng điều đó cho bạn.</p>\n<h2>6. Mang vào phỏng vấn</h2>\n<p>Sau khi xong, bạn có một câu chuyện thật để kể trong phần 프로젝트 질문: <em>&quot;Em viết API đặt hàng; lúc đầu dùng SELECT rồi UPDATE nên khi test 5 request đồng thời thì bán vượt kho. Em đổi sang UPDATE có điều kiện trong transaction, xử lý theo thứ tự id để tránh deadlock, và viết test tái hiện race condition.&quot;</em> — đó là loại câu trả lời người phỏng vấn muốn nghe: vấn đề → nguyên nhân → cách sửa → cách kiểm chứng.</p>\n",
+    "source": "content/06-real-project/04-tasks.md",
+    "snippetSchema": "",
+    "snippetHelpers": "",
+    "snippetNeedsSql": false,
+    "exercises": []
+   }
+  ]
  }
 ];

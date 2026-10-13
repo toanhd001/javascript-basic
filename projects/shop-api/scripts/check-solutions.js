@@ -14,7 +14,7 @@ try {
     filter: (src) => !/[/\\](node_modules|solutions)([/\\]|$)/.test(path.relative(root, src) ? '/' + path.relative(root, src) : '')
   });
   cpSync(path.join(root, 'solutions'), work, { recursive: true });
-  symlinkSync(path.join(root, 'node_modules'), path.join(work, 'node_modules'), 'dir');
+  symlinkSync(path.join(root, 'node_modules'), path.join(work, 'node_modules'), 'junction'); // junction: Windows không cần quyền admin; Linux/macOS bỏ qua tham số này
   const result = spawnSync(process.execPath, ['--test', '--test-concurrency=1', 'test/*.test.js'], { cwd: work, stdio: 'inherit' });
   process.exitCode = result.status ?? 1;
 } finally {
